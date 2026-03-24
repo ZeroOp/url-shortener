@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-depl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: auth
+  template:
+    metadata:
+      labels:
+        app: auth
+    spec:
+      containers:
+        - name: auth
+          image: zeroop/url-shortner-auth-service
+          env:
+            - name: JWT_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: auth-secrets
+                  key: JWT_KEY
+            - name: MONGO_URI
+              valueFrom:
+                secretKeyRef:
+                  name: auth-secrets
+                  key: MONGO_URI
+          ports:
+            - containerPort: 3000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth-srv
+spec:
+  selector:
+    app: auth
+  ports:
+    - name: auth
+      protocol: TCP
+      port: 3000
+      targetPort: 3000

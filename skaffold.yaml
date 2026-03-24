@@ -1,0 +1,13 @@
+apiVersion: skaffold/v4beta6
+kind: Config
+metadata:
+  name: url-shortener
+
+manifests:
+  rawYaml:
+    - infra/k8s/app-secreats.yaml
+    - infra/k8s/auth-mongo-depl.yaml
+    - infra/k8s/auth-depl.yaml
+
+deploy:
+  kubectl: {}
