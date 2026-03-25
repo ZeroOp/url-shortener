@@ -6,3 +6,12 @@ type: Opaque
 stringData:
   MONGO_URI: mongodb://mongo-0.mongo:27017,mongo-1.mongo:27017,mongo-2.mongo:27017/authdb?replicaSet=rs0
   JWT_KEY: mysecretkey
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: cassandra-secrets
+type: Opaque
+stringData:
+  CASSANDRA_CONTACT_POINTS: cassandra
+  CASSANDRA_KEYSPACE: url_shortener
