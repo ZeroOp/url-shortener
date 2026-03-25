@@ -1,6 +1,6 @@
 {
-  "name": "@zeroop-dev/url-shortner-common",
-  "version": "1.0.1",
+  "name": "@zeroop-dev/common",
+  "version": "1.0.0",
   "main": "./build/index.js",
   "types": "./build/index.d.ts",
   "files": [
