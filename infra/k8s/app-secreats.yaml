@@ -4,5 +4,5 @@ metadata:
   name: auth-secrets
 type: Opaque
 stringData:
-  MONGO_URI: mongodb://mongo-0.mongo:27017,mongo-1.mongo:27017,mongo-2.mongo:27017/?replicaSet=rs0
+  MONGO_URI: mongodb://mongo-0.mongo:27017,mongo-1.mongo:27017,mongo-2.mongo:27017/authdb?replicaSet=rs0
   JWT_KEY: mysecretkey
