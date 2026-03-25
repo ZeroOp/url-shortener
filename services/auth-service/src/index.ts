@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
 import { app } from "./app";
-import { DatabaseConnectionError } from "@zeroop-dev/common/build/url-shortner/errors";
 
 const start = async () => {
     if (!process.env.JWT_KEY) {
@@ -10,12 +9,18 @@ const start = async () => {
         throw new Error("MONGO_URI must be defined");
     }
 
-    try {
-        await mongoose.connect(process.env.MONGO_URI);
-        console.log("Connected to MongoDB");
-    }
-    catch (err) {
-        throw new DatabaseConnectionError();
+    let connected = false;
+    while (!connected) {
+        try {
+            console.log("Attempting to connect to MongoDB...");
+            await mongoose.connect(process.env.MONGO_URI);
+            connected = true;
+            console.log("Connected to MongoDB successfully");
+        } catch (err) {
+            console.error("Database connection failed. Retrying in 5 seconds...");
+            // Wait for 5 seconds before the next loop iteration
+            await new Promise((resolve) => setTimeout(resolve, 5000));
+        }
     }
     app.listen(3000, () => {
         console.log("Auth service is running on port 3000");

@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: url-depl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: url
+  template:
+    metadata:
+      labels:
+        app: url
+    spec:
+      containers:
+        - name: url
+          image: zeroop/url-shortner-url-service   # <-- change if needed
+          env:
+            - name: CASSANDRA_CONTACT_POINTS
+              valueFrom:
+                secretKeyRef:
+                  name: cassandra-secrets
+                  key: CASSANDRA_CONTACT_POINTS
+
+            - name: CASSANDRA_KEYSPACE
+              valueFrom:
+                secretKeyRef:
+                  name: cassandra-secrets
+                  key: CASSANDRA_KEYSPACE
+
+            # Optional: if URL service talks to auth service
+            # - name: AUTH_SERVICE_URL
+            #   value: http://auth-srv:3000
+
+          ports:
+            - containerPort: 3000
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: url-srv
+spec:
+  selector:
+    app: url
+  ports:
+    - name: url
+      protocol: TCP
+      port: 3000
+      targetPort: 3000

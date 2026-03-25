@@ -34,8 +34,14 @@ spec:
             - "--replSet"
             - "rs0"
             - "--bind_ip_all"
-          ports:
-            - containerPort: 27017
+            # Limits the WiredTiger cache size (internal Mongo memory)
+            - "--wiredTigerCacheSizeGB"
+            - "0.25" 
+          resources:
+            requests:
+              memory: "300Mi"
+            limits:
+              memory: "512Mi" # Total 1.5GB for the cluster
           volumeMounts:
             - name: mongo-data
               mountPath: /data/db
