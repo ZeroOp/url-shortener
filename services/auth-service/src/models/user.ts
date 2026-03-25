@@ -44,11 +44,13 @@ userSchema.pre('save', async function() {
 });
 
 
-const User : UserModel = mongoose.model<UserDoc, UserModel>('User', userSchema);  // Define  userModel.
 
 // Define custom buildMethode. 
 userSchema.statics.build = (attrs: UserAttrs) => {
     return new User(attrs);
 }
+
+const User : UserModel = mongoose.model<UserDoc, UserModel>('User', userSchema);  // Define  userModel.
+
 
 export { User }; 
