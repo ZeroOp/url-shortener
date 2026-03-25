@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import { app } from "./app";
+import { DatabaseConnectionError } from "@zeroop-dev/common/build/url-shortner/errors";
 
 const start = async () => {
     if (!process.env.JWT_KEY) {
@@ -14,7 +15,7 @@ const start = async () => {
         console.log("Connected to MongoDB");
     }
     catch (err) {
-        console.log(err);
+        throw new DatabaseConnectionError();
     }
     app.listen(3000, () => {
         console.log("Auth service is running on port 3000");
