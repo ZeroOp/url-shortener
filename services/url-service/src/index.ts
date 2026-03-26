@@ -1,47 +1,39 @@
-import { Client } from "cassandra-driver";
 import { app } from "./app";
 import { redisClient } from "./redis-client";
+import { cassandraWrapper } from "./cassandra-wrapper";
 
 const start = async () => {
+    // 1. Env Checks
     if (!process.env.CASSANDRA_CONTACT_POINTS || !process.env.CASSANDRA_LOCAL_DC) {
         throw new Error("CASSANDRA_CONTACT_POINTS and CASSANDRA_LOCAL_DC must be defined");
     }
 
     const contactPoints = process.env.CASSANDRA_CONTACT_POINTS.split(',');
 
-    const client = new Client({
-        contactPoints: contactPoints,
-        localDataCenter: process.env.CASSANDRA_LOCAL_DC,
-        keyspace: process.env.CASSANDRA_KEYSPACE
-    });
-
+    // 2. Initialize Redis
     console.log('[url] Initializing Redis...');
     await redisClient.ping();
-    // redisClient.connect();
 
-    let connected = false;
-    while (!connected) {
-        try {
-            console.log("Attempting to connect to Cassandra cluster...");
-            await client.connect();
-            connected = true;
-            console.log("Successfully connected to Cassandra!");
-            
-            // Log which node we actually hit
-            const hosts = client.getState().getConnectedHosts();
-            hosts.forEach(h => console.log(`Connected to host: ${h.address}`));
-            
-        } catch (err) {
-            console.error("Cassandra connection failed. Retrying in 5 seconds...");
-            // Wait 5 seconds before trying again
-            await new Promise(resolve => setTimeout(resolve, 5000));
-        }
+    // 3. Connect Cassandra (The Wrapper now handles the retry loop internally)
+    try {
+        await cassandraWrapper.connect(
+            contactPoints, 
+            process.env.CASSANDRA_LOCAL_DC, 
+            process.env.CASSANDRA_KEYSPACE
+        );
+
+        // 4. Log the state once connected
+        const hosts = cassandraWrapper.client.getState().getConnectedHosts();
+        hosts.forEach(h => console.log(`Connected to host: ${h.address}`));
+    } catch (err) {
+        console.error("Fatal: Could not connect to Cassandra", err);
+        process.exit(1);
     }
 
+    // 5. Start App
     app.listen(3000, () => {
         console.log("URL Service is listening on port 3000");
     });
-
 }
 
 start();

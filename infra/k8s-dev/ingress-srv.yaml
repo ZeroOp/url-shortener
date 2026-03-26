@@ -17,3 +17,13 @@ spec:
                 name: auth-srv
                 port:
                   number: 3000
+    - host: link.zeroop.dev
+      http:
+        paths:
+          - path: /api/url(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: url-srv
+                port:
+                  number: 3000
