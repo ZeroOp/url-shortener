@@ -10,6 +10,16 @@ spec:
     - host: link.zeroop.dev
       http:
         paths:
+          - path: /api/id-gen/next-range
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: counter-srv
+                port:
+                  number: 3000
+    - host: link.zeroop.dev
+      http:
+        paths:
           - path: /api/users(/|$)(.*)
             pathType: ImplementationSpecific
             backend:

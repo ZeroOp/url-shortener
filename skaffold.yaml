@@ -26,11 +26,21 @@ build:
           - src: "src/**/*.ts"
             dest: .
 
+    - image: zeroop/url-shortner-counter-service
+      context: services/counter-service
+      docker:
+        dockerfile: Dockerfile
+      sync:
+        manual:
+          - src: "src/**/*.ts"
+            dest: .
+
 manifests:
   rawYaml:
     - infra/k8s/databases/*
     - infra/k8s/auth-depl.yaml
     - infra/k8s/url-depl.yaml
+    - infra/k8s/counter-depl.yaml
     - infra/k8s-dev/*
 
 deploy:
