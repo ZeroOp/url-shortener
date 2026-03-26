@@ -13,5 +13,16 @@ metadata:
   name: cassandra-secrets
 type: Opaque
 stringData:
-  CASSANDRA_CONTACT_POINTS: cassandra
-  CASSANDRA_KEYSPACE: url_shortener
+  CASSANDRA_CONTACT_POINTS: "cassandra-0.cassandra,cassandra-1.cassandra,cassandra-2.cassandra"
+  CASSANDRA_KEYSPACE: "url_shortener"
+  CASSANDRA_LOCAL_DC: "datacenter1" # Useful to have as an env var
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: redis-secrets
+type: Opaque
+stringData:
+  # The Headless Service DNS names for all 8 pods
+  REDIS_NODES: "redis-cluster-0.redis-cluster-srv:6379,redis-cluster-1.redis-cluster-srv:6379,redis-cluster-2.redis-cluster-srv:6379,redis-cluster-3.redis-cluster-srv:6379,redis-cluster-4.redis-cluster-srv:6379,redis-cluster-5.redis-cluster-srv:6379,redis-cluster-6.redis-cluster-srv:6379,redis-cluster-7.redis-cluster-srv:6379"
+  REDIS_PASSWORD: "" # Empty for your local alpine setup

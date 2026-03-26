@@ -15,22 +15,11 @@ spec:
       containers:
         - name: url
           image: zeroop/url-shortner-url-service   # <-- change if needed
-          env:
-            - name: CASSANDRA_CONTACT_POINTS
-              valueFrom:
-                secretKeyRef:
-                  name: cassandra-secrets
-                  key: CASSANDRA_CONTACT_POINTS
-
-            - name: CASSANDRA_KEYSPACE
-              valueFrom:
-                secretKeyRef:
-                  name: cassandra-secrets
-                  key: CASSANDRA_KEYSPACE
-
-            # Optional: if URL service talks to auth service
-            # - name: AUTH_SERVICE_URL
-            #   value: http://auth-srv:3000
+          envFrom:
+            - secretRef:
+                name: cassandra-secrets
+            - secretRef:
+                name: redis-secrets # <--- Add this line here
 
           ports:
             - containerPort: 3000

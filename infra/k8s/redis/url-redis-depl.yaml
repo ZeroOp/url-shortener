@@ -1,0 +1,70 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: redis-cluster-config
+data:
+  redis.conf: |
+    port 6379
+    cluster-enabled yes
+    cluster-config-file nodes.conf
+    cluster-node-timeout 5000
+    appendonly no
+    save ""
+    # Strict memory management for local laptop
+    maxmemory 100mb
+    maxmemory-policy allkeys-lru
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: redis-cluster
+spec:
+  serviceName: "redis-cluster-srv"
+  replicas: 8 # 4 Masters + 4 Replicas
+  selector:
+    matchLabels:
+      app: redis-cluster
+  template:
+    metadata:
+      labels:
+        app: redis-cluster
+    spec:
+      containers:
+      - name: redis
+        image: redis:7-alpine
+        command: ["redis-server", "/conf/redis.conf"]
+        resources:
+          requests:
+            memory: "64Mi"   # Very small start
+            cpu: "50m"      # Minimal CPU
+          limits:
+            memory: "256Mi"  # Hard cap per pod
+            cpu: "250m"     # Max 1/4 core per pod
+        ports:
+        - containerPort: 6379
+          name: client
+        - containerPort: 16379
+          name: gossip
+        volumeMounts:
+        - name: conf
+          mountPath: /conf
+        - name: data
+          mountPath: /data
+      volumes:
+      - name: conf
+        configMap:
+          name: redis-cluster-config
+      - name: data
+        emptyDir: {} # Temporary storage
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-cluster-srv
+spec:
+  clusterIP: None
+  ports:
+  - port: 6379
+    targetPort: 6379
+  selector:
+    app: redis-cluster
