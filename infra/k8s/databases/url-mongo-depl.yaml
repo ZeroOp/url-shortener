@@ -1,0 +1,54 @@
+# Headless service for URL MongoDB Cluster
+apiVersion: v1
+kind: Service
+metadata:
+  name: url-mongo-srv
+spec:
+  clusterIP: None
+  selector:
+    app: url-mongo
+  ports:
+    - port: 27017
+---
+# StatefulSet for URL MongoDB Cluster
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: url-mongo
+spec:
+  serviceName: url-mongo-srv
+  replicas: 3
+  selector:
+    matchLabels:
+      app: url-mongo
+  template:
+    metadata:
+      labels:
+        app: url-mongo
+    spec:
+      containers:
+        - name: mongo
+          image: mongo:6
+          command:
+            - mongod
+            - "--replSet"
+            - "rs0"
+            - "--bind_ip_all"
+            - "--wiredTigerCacheSizeGB"
+            - "0.25" 
+          resources:
+            requests:
+              memory: "300Mi"
+            limits:
+              memory: "512Mi"
+          volumeMounts:
+            - name: url-mongo-data
+              mountPath: /data/db
+  volumeClaimTemplates:
+    - metadata:
+        name: url-mongo-data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 1Gi

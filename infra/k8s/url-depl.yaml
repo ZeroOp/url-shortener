@@ -14,12 +14,14 @@ spec:
     spec:
       containers:
         - name: url
-          image: zeroop/url-shortner-url-service   # <-- change if needed
+          image: zeroop/url-shortner-url-service   
           envFrom:
+            - secretRef:
+                name: url-mongo-secrets
             - secretRef:
                 name: cassandra-secrets
             - secretRef:
-                name: redis-secrets # <--- Add this line here
+                name: redis-secrets 
 
           ports:
             - containerPort: 3000

@@ -10,6 +10,15 @@ stringData:
 apiVersion: v1
 kind: Secret
 metadata:
+  name: url-mongo-secrets # Dedicated secrets for the URL Service
+type: Opaque
+stringData:
+  # Added w=majority for safety and secondaryPreferred for read scaling
+  MONGO_URI: "mongodb://url-mongo-0.url-mongo-srv:27017,url-mongo-1.url-mongo-srv:27017,url-mongo-2.url-mongo-srv:27017/url_db?replicaSet=rs0&w=2&readPreference=secondaryPreferred"
+---
+apiVersion: v1
+kind: Secret
+metadata:
   name: cassandra-secrets
 type: Opaque
 stringData:

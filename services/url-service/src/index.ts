@@ -1,38 +1,44 @@
 import { app } from "./app";
 import { redisClient } from "./redis-client";
-import { cassandraWrapper } from "./cassandra-wrapper";
+import mongoose from "mongoose"; // Assuming you're using Mongoose for the URL service
 
 const start = async () => {
-    // 1. Env Checks
-    if (!process.env.CASSANDRA_CONTACT_POINTS || !process.env.CASSANDRA_LOCAL_DC) {
-        throw new Error("CASSANDRA_CONTACT_POINTS and CASSANDRA_LOCAL_DC must be defined");
+    // 1. Env Checks (Updated for MongoDB)
+    if (!process.env.MONGO_URI) {
+        throw new Error("MONGO_URI must be defined");
     }
 
-    const contactPoints = process.env.CASSANDRA_CONTACT_POINTS.split(',');
-
-    // 2. Initialize Redis
-    console.log('[url] Initializing Redis...');
-    await redisClient.ping();
-
-    // 3. Connect Cassandra (The Wrapper now handles the retry loop internally)
+    // 2. Initialize Redis (Stays the same - great for 'hot' links!)
     try {
-        await cassandraWrapper.connect(
-            contactPoints, 
-            process.env.CASSANDRA_LOCAL_DC, 
-            process.env.CASSANDRA_KEYSPACE
-        );
-
-        // 4. Log the state once connected
-        const hosts = cassandraWrapper.client.getState().getConnectedHosts();
-        hosts.forEach(h => console.log(`Connected to host: ${h.address}`));
+        console.log('[url] Initializing Redis...');
+        await redisClient.ping();
+        console.log('[url] Redis Connected');
     } catch (err) {
-        console.error("Fatal: Could not connect to Cassandra", err);
+        console.error("[url] Redis Connection Failed", err);
+    }
+
+    // 3. Connect MongoDB Replica Set
+    try {
+        console.log('[url] Connecting to MongoDB Replica Set...');
+        
+        /* Your MONGO_URI from the K8s env should look like:
+           mongodb://url-mongo-0.url-mongo-srv:27017,url-mongo-1.url-mongo-srv:27017,url-mongo-2.url-mongo-srv:27017/url_db?replicaSet=rs0&w=majority&readPreference=secondaryPreferred
+        */
+        await mongoose.connect(process.env.MONGO_URI);
+
+        console.log('[url] Connected to MongoDB Successfully');
+        
+        // Log the connection state (optional but helpful)
+        const dbName = mongoose.connection.name;
+        console.log(`[url] Using Database: ${dbName}`);
+    } catch (err) {
+        console.error("[url] Fatal: Could not connect to MongoDB", err);
         process.exit(1);
     }
 
-    // 5. Start App
+    // 4. Start App
     app.listen(3000, () => {
-        console.log("URL Service is listening on port 3000");
+        console.log("[url] URL Service is listening on port 3000");
     });
 }
 
