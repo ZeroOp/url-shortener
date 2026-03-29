@@ -16,6 +16,7 @@
   "description": "",
   "dependencies": {
     "@zeroop-dev/common": "^1.0.19",
+    "axios": "^1.14.0",
     "cassandra-driver": "^4.8.0",
     "express": "^5.2.1",
     "express-validator": "^7.3.1",

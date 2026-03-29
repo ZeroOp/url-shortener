@@ -15,6 +15,9 @@ spec:
       containers:
         - name: url
           image: zeroop/url-shortner-url-service   
+          env:
+            - name: COUNTER_SERVICE_URL
+              value: "http://counter-srv:3000"
           envFrom:
             - secretRef:
                 name: url-mongo-secrets

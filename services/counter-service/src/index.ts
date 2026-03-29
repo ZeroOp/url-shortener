@@ -37,7 +37,7 @@ const connectWithRetry = async () => {
 const setupEndpoints = () => {
   app.post('/api/id-gen/next-range', async (req, res) => {
     try {
-      const BATCH_SIZE = 1000;
+      const BATCH_SIZE = 3000;
       // Atomic increment
       const newUpperLimit = await redis.incrBy('global_id_counter', BATCH_SIZE);
       
