@@ -15,7 +15,7 @@
   "type": "commonjs",
   "description": "",
   "dependencies": {
-    "@zeroop-dev/common": "^1.0.19",
+    "@zeroop-dev/common": "^1.0.22",
     "axios": "^1.14.0",
     "cassandra-driver": "^4.8.0",
     "express": "^5.2.1",
