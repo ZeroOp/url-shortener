@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: StatefulSet # Changed from Deployment
+metadata:
+  name: nats-depl
+spec:
+  serviceName: "nats-srv"
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nats
+  template:
+    metadata:
+      labels:
+        app: nats
+    spec:
+      containers:
+        - name: nats
+          image: nats-streaming:0.17.0
+          args: [
+              "-p", "4222",
+              "-m", "8222",
+              "-hbi", "5s",
+              "-hbt", "5s",
+              "-hbf", "2",
+              "-SD",
+              "-cid", "url-shortener", 
+              "-dir", "/data"      # CRITICAL: Tell NATS to store data in /data
+            ]
+          volumeMounts:
+            - name: nats-storage
+              mountPath: /data
+  volumeClaimTemplates: # This automatically creates the PVC
+    - metadata:
+        name: nats-storage
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: 1Gi

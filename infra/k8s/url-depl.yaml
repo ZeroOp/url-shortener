@@ -18,17 +18,23 @@ spec:
           env:
             - name: COUNTER_SERVICE_URL
               value: "http://counter-srv:3000"
+            # Dynamic Client ID for NATS (Unique per pod)
+            - name: NATS_CLIENT_ID
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
           envFrom:
             - secretRef:
                 name: url-mongo-secrets
             - secretRef:
                 name: cassandra-secrets
             - secretRef:
-                name: redis-secrets 
-
+                name: redis-secrets
+            # --- NATS WIRING ADDED HERE ---
+            - secretRef:
+                name: nats-secrets
           ports:
             - containerPort: 3000
-
 ---
 apiVersion: v1
 kind: Service
