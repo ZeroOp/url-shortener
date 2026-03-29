@@ -7,7 +7,7 @@ class Listener {
     constructor(client) {
         this.client = client;
     }
-    subscriptionOptionis() {
+    subscriptionOptions() {
         return this.client.subscriptionOptions()
             .setDeliverAllAvailable()
             .setManualAckMode(true)
@@ -15,7 +15,7 @@ class Listener {
             .setDurableName(this.queueGroupName);
     }
     listen() {
-        const subscription = this.client.subscribe(this.subject, this.queueGroupName, this.subscriptionOptionis());
+        const subscription = this.client.subscribe(this.subject, this.queueGroupName, this.subscriptionOptions());
         subscription.on('message', (msg) => {
             console.log(`Message recived: ${this.subject} / ${this.queueGroupName}`);
             const parseData = this.parseMessage(msg);
