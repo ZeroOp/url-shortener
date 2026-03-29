@@ -4,7 +4,7 @@ import mongoose from "mongoose";
 interface UrlAttrs {
     longUrl: string;
     shortUrl: string; // This is your 'shortCode'
-    userId?: string;
+    userId: string | null;
     expiresAt?: Date;
     isAliased: boolean;
 }
@@ -19,7 +19,7 @@ enum UrlStatus {
 interface UrlDoc extends mongoose.Document {
     longUrl: string;
     shortUrl: string;
-    userId: string;
+    userId: string | null;
     expiresAt?: Date;
     status: UrlStatus; 
     isAliased: boolean;

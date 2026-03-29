@@ -3,6 +3,7 @@ import { json } from 'body-parser'
 import { currentUser, errorHandler } from '@zeroop-dev/common/build/url-shortner/middlewares';
 import { shortenLongUrl } from './routes/shorten';
 import { NotFoundError } from '@zeroop-dev/common/build/url-shortner/errors';
+import { redirectRouter } from './routes/redirect';
 
 const app = express();
 
@@ -12,8 +13,9 @@ app.use(json());
 app.use(currentUser);
 
 app.use('/api/url', shortenLongUrl);
+app.use(redirectRouter);
 
-app.use(() => {
+app.all( '*' ,async () => {
     throw new NotFoundError();
   });
   

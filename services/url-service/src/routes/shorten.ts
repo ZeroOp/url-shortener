@@ -2,8 +2,9 @@ import { validateRequest } from '@zeroop-dev/common/build/url-shortner/middlewar
 import express, {Request, Response} from 'express'
 import { body } from 'express-validator';
 import { idGenerator } from '../services/id-generator.service';
-import { Url, UrlStatus } from '../models/url';
+import { Url } from '../models/url';
 import { BadRequestError } from '@zeroop-dev/common/build/url-shortner/errors';
+import { checkAliasConflict, findExistingAnonymousUrl, validateReservedWords } from './url-helper';
 
 const router = express.Router();
 
@@ -16,58 +17,45 @@ router.post('/shorten',
     ],
     validateRequest,
     async (req: Request, res: Response) => {
-        const currentUser = req.currentUser;
         const { longUrl, isAliased, expiresAt, customAlias } = req.body;
+        const currentUserId = req.currentUser ? req.currentUser.id : null;
 
-        // 1. Handle Custom Alias (The "Bypass" Logic)
+        // --- PHASE 1: CUSTOM ALIAS VALIDATION ---
         if (isAliased) {
+            // Requirement: User must be authenticated for custom URLs
+            if (!currentUserId) {
+                throw new BadRequestError('Authentication required to create custom aliases');
+            }
             if (!customAlias) {
                 throw new BadRequestError('Custom alias is required when isAliased is true');
             }
 
-            // Check Reserved Words (Prevents users from taking /api, /r, /login, etc.)
-            const reserved = ['api', 'r', 'admin', 'login', 'health', 'dashboard'];
-            if (reserved.includes(customAlias.toLowerCase())) {
-                throw new BadRequestError('This alias is reserved for system use');
-            }
-
-            // Check if Custom Alias is already taken
-            const conflict = await Url.findOne({ shortUrl: customAlias });
-            if (conflict) {
-                throw new BadRequestError('Custom alias already in use');
-            }
+            validateReservedWords(customAlias);
+            await checkAliasConflict(customAlias);
         }
 
-        // 2. Deduplication Check (Only for Anonymous/General links)
-        // We use our { longUrl, userId, status } index here
+        // --- PHASE 2: DEDUPLICATION ---
+        // Only skip generation if it's a standard random link
         if (!isAliased) {
-            const existingUrl = await Url.findOne({
-                userId: currentUser ? currentUser.id : null,
-                longUrl: longUrl,
-                status: UrlStatus.Active // Match our index field name
-            });
+            const existingUrl = await findExistingAnonymousUrl(longUrl, currentUserId);
 
             if (existingUrl) {
                 return res.status(200).send(existingUrl);
             }
         }
 
-        // 3. Generate Short Code
-        // If it's a custom alias, use it; otherwise, pull from your K8s-buffered generator
+        // --- PHASE 3: EXECUTION ---
         const shortUrlCode = isAliased ? customAlias : await idGenerator.getNextShortCode();
 
-        // 4. Build and Save
         const url = Url.build({
-            userId: currentUser ? currentUser.id : undefined,
-            longUrl: longUrl,
+            userId: currentUserId, // Use null for DB consistency
+            longUrl,
             shortUrl: shortUrlCode,
-            isAliased: isAliased,
+            isAliased,
             expiresAt: expiresAt ? new Date(expiresAt) : undefined
         });
 
         await url.save();
-
-        // 5. Response (Include full object for frontend ease)
         res.status(201).send(url);
     }
 );
