@@ -15,10 +15,10 @@ app.use(currentUser);
 app.use('/api/url', shortenLongUrl);
 app.use(redirectRouter);
 
-app.all( '*' ,async () => {
-    throw new NotFoundError();
-  });
-  
+// Instead of app.all(), just use a standard middleware at the end of your routes
+app.use((req, res) => {
+  throw new NotFoundError();
+});
 app.use(errorHandler);
 
 export { app };

@@ -5,6 +5,8 @@ import { idGenerator } from '../services/id-generator.service';
 import { Url } from '../models/url';
 import { BadRequestError } from '@zeroop-dev/common/build/url-shortner/errors';
 import { checkAliasConflict, findExistingAnonymousUrl, validateReservedWords } from './url-helper';
+import { UrlCreatedPublisher } from '../events/publishers/url-created-publisher';
+import { natsWrapper } from '../nats-wrapper';
 
 const router = express.Router();
 
@@ -56,6 +58,28 @@ router.post('/shorten',
         });
 
         await url.save();
+
+        try {
+            await new UrlCreatedPublisher(natsWrapper.client).publish({
+                id: url.id,
+                longUrl: url.longUrl,
+                shortUrl: url.shortUrl,
+                // Fix: If currentUserId is undefined, explicitly send null
+                userId: currentUserId ?? null, 
+                expiresAt: url.expiresAt ? url.expiresAt.toISOString() : undefined,
+                // Ensure these match your interface as well:
+                isAliased: url.isAliased,
+                version: 0,
+                status: url.status // Assuming your model has the status field
+            });
+            console.log(`[url] Event Published: URL created for ${shortUrlCode}`);
+        } catch (err) {
+            // We log the error but don't fail the request since the DB save was successful.
+            // In a more advanced setup, you'd use the "Outbox Pattern" here.
+            console.error('[url] Failed to publish UrlCreated event', err);
+        }
+
+
         res.status(201).send(url);
     }
 );

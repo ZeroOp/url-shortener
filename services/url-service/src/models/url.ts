@@ -17,6 +17,7 @@ enum UrlStatus {
 
 // 2. The Document properties (includes Mongoose internal properties)
 interface UrlDoc extends mongoose.Document {
+    id: string;
     longUrl: string;
     shortUrl: string;
     userId: string | null;

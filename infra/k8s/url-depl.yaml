@@ -33,6 +33,8 @@ spec:
             # --- NATS WIRING ADDED HERE ---
             - secretRef:
                 name: nats-secrets
+            - secretRef:
+                name: auth-secrets
           ports:
             - containerPort: 3000
 ---

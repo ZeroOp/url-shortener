@@ -38,6 +38,7 @@ build:
 manifests:
   rawYaml:
     - infra/k8s/databases/*
+    - infra/k8s/event-bus/*
     - infra/k8s/auth-depl.yaml
     - infra/k8s/url-depl.yaml
     - infra/k8s/counter-depl.yaml
