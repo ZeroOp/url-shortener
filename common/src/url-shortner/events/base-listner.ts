@@ -17,7 +17,7 @@ export abstract class Listener<T extends Event> {
         this.client = client;
     }
 
-    subscriptionOptionis() {
+    subscriptionOptions() {
         return this.client.subscriptionOptions()
                           .setDeliverAllAvailable()
                           .setManualAckMode(true)
@@ -29,7 +29,7 @@ export abstract class Listener<T extends Event> {
         const subscription = this.client.subscribe(
             this.subject,
             this.queueGroupName,
-            this.subscriptionOptionis()
+            this.subscriptionOptions()
         )
 
         subscription.on('message' , (msg: Message) => {
