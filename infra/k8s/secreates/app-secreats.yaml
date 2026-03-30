@@ -44,4 +44,15 @@ metadata:
 type: Opaque
 stringData:
   NATS_URL: "http://nats-srv:4222"
-  NATS_CLUSTER_ID: "url-shortener" 
+  NATS_CLUSTER_ID: "url-shortener"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: analytics-secrets
+type: Opaque
+stringData:
+  # We point to the headless service. 
+  # ClickHouse clients can use this to discover the nodes.
+  CLICKHOUSE_URI: "http://default:@clickhouse-0.clickhouse-srv:8123/analytics"
+  JWT_KEY: "mysecretkey"
