@@ -2,29 +2,44 @@ import express, { Request, Response } from 'express';
 import { Url, UrlStatus } from '../models/url';
 import { BadRequestError, NotFoundError } from '@zeroop-dev/common/build/url-shortner/errors';
 import { redisClient } from '../redis-client';
+import { UrlClickedPublisher } from '../events/publishers/url-clicked-publisher';
+import { natsWrapper } from '../nats-wrapper';
+import { UrlClickedEvent } from '@zeroop-dev/common/build/url-shortner/events';
 const router = express.Router();
+
+const publishClickEvent = async (event: UrlClickedEvent["data"]) => {
+    try {
+        await new UrlClickedPublisher(natsWrapper.client).publish(event);
+        console.log(`[url] Event Published: Clicked Url for ${event.shortUrl}`);
+    } catch (err) {
+        // We log the error but don't fail the request since the DB save was successful.
+        // In a more advanced setup, you'd use the "Outbox Pattern" here.
+        console.error('[url] Failed to publish UrlCreated event', err);
+    }
+}
 
 /**
  * Helper: Process the redirection logic
  * This handles the Cache-Aside pattern + Click tracking
  */
-const handleRedirection = async (shortCode: string, res: Response) => {
-    console.log("Point 1:", shortCode);
+const handleRedirection = async (shortiUrl: string, req: Request, res: Response) => {
+    const userAgent = req.headers['user-agent'] || 'unknown';
+    const ip = req.ip || 'unknown';
+    
     // 1. Try Cache First (Redis)
-    const cachedUrl = await redisClient.get(shortCode);
+    const cachedUrl = await redisClient.get(shortiUrl);
     if (cachedUrl) {
-        // Background task: Increment clicks in DB (don't await to keep redirect fast)
-        Url.updateOne({ shortCode }, { $inc: { clicks: 1 } }).exec();
+        console.log("Picked from cache");
+        publishClickEvent({ shortUrl : shortiUrl, ip ,userAgent, timestamp: new Date().toISOString() });
         return res.redirect(cachedUrl);
     }
-    console.log("Point 2:", cachedUrl);
+    
     // 2. Database Fallback
     const url = await Url.findOne({ 
-        shortUrl: shortCode, 
+        shortUrl: shortiUrl, 
         status: UrlStatus.Active 
     });
 
-    console.log("point 3:", url);
     if (!url) {
         throw new NotFoundError();
     }
@@ -33,12 +48,9 @@ const handleRedirection = async (shortCode: string, res: Response) => {
     // 3. Update Cache & Increment Clicks
     // Cache for 24 hours to handle "Viral" links efficiently
     // For ioredis / Cluster mode:
-    await redisClient.setex(shortCode, 86400, url.longUrl);
+    await redisClient.setex(shortiUrl, 86400, url.longUrl);
     
-    /*
-        Send Event to nats streaming server , click event. 
-    */
-
+    publishClickEvent({ shortUrl : shortiUrl, ip ,userAgent, timestamp: new Date().toISOString() });
     return res.status(302).redirect(url.longUrl);
 };
 /**
@@ -52,7 +64,7 @@ router.get('/r/:shortId', async (req: Request, res: Response) => {
         throw new BadRequestError('Invalid short ID format');
     }
 
-    await handleRedirection(shortId, res);
+    await handleRedirection(shortId, req, res);
 });
 
 /**
@@ -66,7 +78,7 @@ router.get('/:customAlias', async (req: Request, res: Response) => {
         throw new BadRequestError('Invalid alias format');
     }
 
-    await handleRedirection(customAlias, res);
+    await handleRedirection(customAlias, req, res);
 });
 
 export { router as redirectRouter };

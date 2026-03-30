@@ -5,6 +5,7 @@ import { currentUser, errorHandler } from '@zeroop-dev/common/build/url-shortner
 import { shortenLongUrl } from './routes/shorten';
 import { NotFoundError } from '@zeroop-dev/common/build/url-shortner/errors';
 import { redirectRouter } from './routes/redirect';
+import { deleteUrlRouter } from './routes/delete';
 
 const app = express();
 
@@ -22,6 +23,7 @@ app.use(
 
 app.use(currentUser);
 
+app.use(deleteUrlRouter);
 app.use('/api/url', shortenLongUrl);
 app.use(redirectRouter);
 
