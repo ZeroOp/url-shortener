@@ -37,3 +37,25 @@ spec:
                 name: url-srv
                 port:
                   number: 3000
+    - host: link.zeroop.dev
+      http:
+        paths:
+          - path: /r(/|$)(.+)$
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: url-srv
+                port:
+                  number: 3000
+    - host: link.zeroop.dev
+      http:
+        paths:
+          # Custom alias redirects live at "/:customAlias"
+          # Match only a single URL segment ("/someAlias"), so it won't shadow "/api/*" or "/r/<code>".
+          - path: /([^/]+)$
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: url-srv
+                port:
+                  number: 3000

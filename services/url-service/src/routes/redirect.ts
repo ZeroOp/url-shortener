@@ -9,6 +9,7 @@ const router = express.Router();
  * This handles the Cache-Aside pattern + Click tracking
  */
 const handleRedirection = async (shortCode: string, res: Response) => {
+    console.log("Point 1:", shortCode);
     // 1. Try Cache First (Redis)
     const cachedUrl = await redisClient.get(shortCode);
     if (cachedUrl) {
@@ -16,13 +17,14 @@ const handleRedirection = async (shortCode: string, res: Response) => {
         Url.updateOne({ shortCode }, { $inc: { clicks: 1 } }).exec();
         return res.redirect(cachedUrl);
     }
-
+    console.log("Point 2:", cachedUrl);
     // 2. Database Fallback
     const url = await Url.findOne({ 
         shortUrl: shortCode, 
         status: UrlStatus.Active 
     });
 
+    console.log("point 3:", url);
     if (!url) {
         throw new NotFoundError();
     }

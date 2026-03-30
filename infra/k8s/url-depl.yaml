@@ -23,6 +23,11 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.name
+            - name: JWT_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: auth-secrets
+                  key: JWT_KEY
           envFrom:
             - secretRef:
                 name: url-mongo-secrets
