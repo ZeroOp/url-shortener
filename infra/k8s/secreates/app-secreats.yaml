@@ -61,3 +61,18 @@ stringData:
   # Optional: A comma-separated list if your driver supports native LB
   CLICKHOUSE_NODES: "clickhouse-0.clickhouse-srv,clickhouse-1.clickhouse-srv,clickhouse-2.clickhouse-srv,clickhouse-3.clickhouse-srv"
   JWT_KEY: "mysecretkey"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: expiration-secrets
+type: Opaque
+stringData:
+  # The URI for BullJS/BullMQ to connect to the dedicated Redis
+  REDIS_HOST: "expiration-redis-srv"
+  REDIS_PORT: "6379"
+  
+  # NATS configuration (same as your other services)
+  NATS_CLIENT_ID: "expiration-service"
+  NATS_CLUSTER_ID: "url-shortener"
+  NATS_URL: "http://nats-srv:4222"

@@ -43,7 +43,15 @@ build:
         manual:
           - src: "src/**/*.ts"
             dest: .
-
+            
+    - image: zeroop/url-shortner-expiration-service
+      context: services/expiration-service
+      docker:
+        dockerfile: Dockerfile
+      sync:
+        manual:
+          - src: "src/**/*.ts"
+            dest: .
 manifests:
   rawYaml:
     - infra/k8s/databases/*
@@ -52,6 +60,7 @@ manifests:
     - infra/k8s/url-depl.yaml
     - infra/k8s/counter-depl.yaml
     - infra/k8s/analytics-depl.yaml
+    - infra/k8s/expiration-depl.yaml
     - infra/k8s-dev/*
 
 deploy:

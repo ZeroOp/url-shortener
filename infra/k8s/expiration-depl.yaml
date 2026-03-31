@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: expiration-depl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: expiration
+  template:
+    metadata:
+      labels:
+        app: expiration
+    spec:
+      containers:
+        - name: expiration
+          image: zeroop/url-shortner-expiration-service
+          imagePullPolicy: IfNotPresent
+          env:
+            # We use the Pod Name as the Client ID to ensure it is always unique
+            - name: NATS_CLIENT_ID
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            # Pull everything else from the Secret we created
+            - name: NATS_URL
+              valueFrom:
+                secretKeyRef:
+                  name: expiration-secrets
+                  key: NATS_URL
+            - name: NATS_CLUSTER_ID
+              valueFrom:
+                secretKeyRef:
+                  name: expiration-secrets
+                  key: NATS_CLUSTER_ID
+            - name: REDIS_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: expiration-secrets
+                  key: REDIS_HOST
+            - name: REDIS_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: expiration-secrets
+                  key: REDIS_PORT
