@@ -10,6 +10,16 @@ spec:
     - host: link.zeroop.dev
       http:
         paths:
+          - path: /api/analytics(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: analytics-srv # Make sure this matches your ClusterIP service name
+                port:
+                  number: 3000
+    - host: link.zeroop.dev
+      http:
+        paths:
           - path: /api/id-gen/next-range
             pathType: ImplementationSpecific
             backend:

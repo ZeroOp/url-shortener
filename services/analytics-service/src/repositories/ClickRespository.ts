@@ -24,4 +24,48 @@ export class ClicksRepository {
       format: 'JSONEachRow',
     });
   }
+
+  /**
+ * Gets distribution of devices (Mobile vs Desktop) for a specific link.
+ */
+async getDeviceStats(shortUrl: string) {
+  const rs = await this.client.query({
+    query: `
+      SELECT 
+        CASE 
+          WHEN userAgent LIKE '%Mobile%' THEN 'Mobile'
+          WHEN userAgent LIKE '%Tablet%' THEN 'Tablet'
+          ELSE 'Desktop'
+        END as device,
+        count() as count
+      FROM link_clicks
+      WHERE shortUrl = {url:String}
+      GROUP BY device
+    `,
+    query_params: { url: shortUrl },
+    format: 'JSONEachRow',
+  });
+  return await rs.json<{ device: string, count: string }>();
+}
+
+/**
+ * Gets geographical distribution (by Country).
+ */
+async getGeoStats(shortUrl: string) {
+  const rs = await this.client.query({
+    query: `
+      SELECT 
+        country, 
+        count() as count 
+      FROM link_clicks 
+      WHERE shortUrl = {url:String} 
+      GROUP BY country 
+      ORDER BY count DESC
+    `,
+    query_params: { url: shortUrl },
+    format: 'JSONEachRow',
+  });
+  return await rs.json<{ country: string, count: string }>();
+}
+
 }
