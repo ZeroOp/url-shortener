@@ -1,0 +1,1 @@
+export const queueGroupName = 'analytics-service'
