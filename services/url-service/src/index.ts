@@ -1,4 +1,5 @@
 import { app } from "./app";
+import { UrlExpiredListner } from "./events/listeners/url-expired-listner";
 import { natsWrapper } from "./nats-wrapper";
 import { redisClient } from "./redis-client";
 import mongoose from "mongoose";
@@ -75,6 +76,8 @@ const start = async () => {
         console.error("[url] Fatal: Could not connect to MongoDB", err);
         process.exit(1);
     }
+
+    new UrlExpiredListner(natsWrapper.client).listen();
 
     // 5. Start App
     app.listen(3000, () => {
