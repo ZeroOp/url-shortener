@@ -11,7 +11,12 @@ class NatsWrapper {
     }
 
     connect(clusterId: string, clientId: string, url: string) {
-        this._client = nats.connect(clusterId, clientId , { url });
+        const servers = url.split(',');
+        this._client = nats.connect(clusterId, clientId, { 
+            url: servers[0],    // The primary URL
+            servers: servers,   // The full list for failover/clustering
+            waitOnFirstConnect: true, // Wait for a leader election if needed
+        });
         return new Promise<void>((resolve, reject) => {
             this.client.on('connect', () => {
                 console.log('Connected to Nats');
