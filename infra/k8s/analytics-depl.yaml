@@ -1,42 +1,52 @@
-# apiVersion: apps/v1
-# kind: Deployment
-# metadata:
-#   name: analytics-depl
-# spec:
-#   replicas: 1
-#   selector:
-#     matchLabels:
-#       app: analytics
-#   template:
-#     metadata:
-#       labels:
-#         app: analytics
-#     spec:
-#       containers:
-#         - name: analytics
-#           image: zeroop/url-shortner-analytics-service
-#           env:
-#             - name: CLICKHOUSE_URI
-#               valueFrom:
-#                 secretKeyRef:
-#                   name: analytics-secrets
-#                   key: CLICKHOUSE_URI
-#             - name: JWT_KEY
-#               valueFrom:
-#                 secretKeyRef:
-#                   name: analytics-secrets
-#                   key: JWT_KEY
-#             - name: NATS_URL
-#               valueFrom:
-#                 secretKeyRef:
-#                   name: nats-secrets
-#                   key: NATS_URL
-#             - name: NATS_CLUSTER_ID
-#               valueFrom:
-#                 secretKeyRef:
-#                   name: nats-secrets
-#                   key: NATS_CLUSTER_ID
-#             - name: NATS_CLIENT_ID
-#               valueFrom:
-#                 fieldRef:
-#                   fieldPath: metadata.name # Uses pod name as unique NATS Client ID
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: analytics-depl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: analytics
+  template:
+    metadata:
+      labels:
+        app: analytics
+    spec:
+      containers:
+        - name: analytics
+          image: zeroop/url-shortner-analytics-service
+          ports:
+            - containerPort: 3000 # Assuming your Node app port
+          env:
+            - name: CLICKHOUSE_URI
+              valueFrom:
+                secretKeyRef:
+                  name: analytics-secrets
+                  key: CLICKHOUSE_URI
+            - name: JWT_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: analytics-secrets
+                  key: JWT_KEY
+            - name: NATS_URL
+              valueFrom:
+                secretKeyRef:
+                  name: nats-secrets
+                  key: NATS_URL
+            - name: NATS_CLUSTER_ID
+              valueFrom:
+                secretKeyRef:
+                  name: nats-secrets
+                  key: NATS_CLUSTER_ID
+            - name: NATS_CLIENT_ID
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+          # Resource limits are a good habit for local k8s to prevent crashing Docker Desktop
+          resources:
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+            requests:
+              cpu: "250m"
+              memory: "256Mi"

@@ -15,4 +15,4 @@ COPY . .
 RUN npm run build   # this will generate /app/dist
 
 # Set start command
-CMD ["node", "dist/index.js"]
+CMD ["npm", "start"]

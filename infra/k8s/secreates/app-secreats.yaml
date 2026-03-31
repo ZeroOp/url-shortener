@@ -52,7 +52,12 @@ metadata:
   name: analytics-secrets
 type: Opaque
 stringData:
-  # We point to the headless service. 
-  # ClickHouse clients can use this to discover the nodes.
-  CLICKHOUSE_URI: "http://default:@clickhouse-0.clickhouse-srv:8123/analytics"
+  # Point to the Service, not the specific pod (clickhouse-0)
+  CLICKHOUSE_HOST: "clickhouse-srv"
+  CLICKHOUSE_PORT: "8123"
+  CLICKHOUSE_USER: "default"
+  CLICKHOUSE_PASSWORD: "" 
+  CLICKHOUSE_DB: "analytics"
+  # Optional: A comma-separated list if your driver supports native LB
+  CLICKHOUSE_NODES: "clickhouse-0.clickhouse-srv,clickhouse-1.clickhouse-srv,clickhouse-2.clickhouse-srv,clickhouse-3.clickhouse-srv"
   JWT_KEY: "mysecretkey"

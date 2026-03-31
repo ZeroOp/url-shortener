@@ -34,11 +34,19 @@ build:
         manual:
           - src: "src/**/*.ts"
             dest: .
+            
+    - image: zeroop/url-shortner-analytics-service
+      context: services/analytics-service
+      docker:
+        dockerfile: Dockerfile
+      sync:
+        manual:
+          - src: "src/**/*.ts"
+            dest: .
 
 manifests:
   rawYaml:
     - infra/k8s/databases/*
-    - infra/k8s/clickhouse/*
     - infra/k8s/event-bus/*
     - infra/k8s/auth-depl.yaml
     - infra/k8s/url-depl.yaml
