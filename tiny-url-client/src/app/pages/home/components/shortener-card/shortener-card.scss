@@ -1,77 +1,92 @@
 .shortener-card {
-  padding: 40px; 
-  border-radius: 24px;
-  background: white;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.08) !important;
-  border: 1px solid #e5e7eb;
-
-  // --- New Height logic ---
-  height: 80%; 
-  display: flex;
-  flex-direction: column;
-}
-
-// Ensure the content inside the card can take up the available height
-::ng-deep .mat-mdc-card-content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  padding-top: 20px;
-}
-
-.full-width { 
-  width: 100%; 
-  margin-bottom: 20px; 
-}
-
-.shorten-btn { 
-  width: 100%; 
-  height: 56px; 
-  font-weight: 600; 
-  font-size: 1.1rem; 
-  border-radius: 12px;
-  margin-bottom: 20px;
-}
-
-.result-container {
-  margin-top: auto; // This pushes the result box to the bottom of the card if it exists
-  padding: 16px;
-  background-color: #f0fdf4 !important;
-  border: 1px dashed #22c55e !important;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-
-  &:hover { 
-    transform: translateY(-2px); 
-    background-color: #dcfce7 !important; 
-  }
-
-  .result-label { 
-    font-size: 0.75rem; 
-    color: #166534; 
-    font-weight: 700; 
-    text-transform: uppercase; 
-    margin-bottom: 4px; 
-  }
-
-  .result-link {
-    display: flex; 
-    justify-content: space-between; 
-    align-items: center;
-    font-family: 'Roboto Mono', monospace; 
-    font-size: 1.05rem; 
-    color: #15803d;
-    
-    mat-icon { 
-      font-size: 1.2rem; 
-      color: #16a34a; 
+    padding: 40px; 
+    border-radius: 24px;
+    background: white;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.08) !important;
+    border: 1px solid #e5e7eb;
+    display: flex;
+    flex-direction: column;
+  
+    // Fix: Add gap between "Shorten URL" title and the input field
+    .mat-mdc-card-header {
+      padding: 0;
+      margin-bottom: 24px; 
+      
+      .mat-mdc-card-title {
+        color: #1f2937; // Matches your Stats H1 color
+        font-weight: 700;
+        font-size: 1.5rem;
+      }
     }
   }
-
-  .copy-hint { 
-    font-size: 0.7rem; 
-    color: #16a34a; 
-    text-align: right; 
+  
+  // Target the content wrapper specifically
+  ::ng-deep .mat-mdc-card-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    
+    // Fix: This centers the input and button vertically within the 400px
+    justify-content: center; 
+    padding: 0 !important; 
   }
-}
+  
+  .full-width { 
+    width: 100%; 
+    margin-bottom: 20px; 
+  }
+  
+  .shorten-btn { 
+    width: 100%; 
+    height: 56px; 
+    font-weight: 600; 
+    font-size: 1.1rem; 
+    border-radius: 12px;
+    // Using the vibrant blue from your sibling component
+    background-color: #2563eb !important; 
+    color: white !important;
+  }
+  
+  .result-container {
+    // When result appears, it stays below the button with a fixed gap
+    margin-top: 20px; 
+    padding: 16px;
+    background-color: #f0fdf4 !important;
+    border: 1px dashed #22c55e !important;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  
+    &:hover { 
+      transform: translateY(-2px); 
+      background-color: #dcfce7 !important; 
+    }
+  
+    .result-label { 
+      font-size: 0.75rem; 
+      color: #166534; 
+      font-weight: 700; 
+      text-transform: uppercase; 
+      margin-bottom: 4px; 
+    }
+  
+    .result-link {
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center;
+      font-family: 'Roboto Mono', monospace; 
+      font-size: 1.05rem; 
+      color: #15803d;
+      
+      mat-icon { 
+        font-size: 1.2rem; 
+        color: #16a34a; 
+      }
+    }
+  
+    .copy-hint { 
+      font-size: 0.7rem; 
+      color: #16a34a; 
+      text-align: right; 
+    }
+  }

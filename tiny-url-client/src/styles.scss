@@ -17,3 +17,20 @@ html, body {
   background-color: white;
   border-radius: 4px;
 }
+
+
+/* Custom Error Styling */
+.error-snackbar {
+  background-color: #f44336 !important; /* Material Red */
+  color: white !important;
+  font-weight: 500;
+
+  .mat-mdc-snack-bar-action {
+    color: white !important;
+  }
+}
+
+/* The 20px Top Margin Fix */
+.top-margin-snackbar {
+  margin-top: 20px !important; 
+}

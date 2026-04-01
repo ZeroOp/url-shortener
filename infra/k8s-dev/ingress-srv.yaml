@@ -10,16 +10,14 @@ spec:
     - host: link.zeroop.dev
       http:
         paths:
+          # --- GROUP 1: API ROUTES ---
           - path: /api/analytics(/|$)(.*)
             pathType: ImplementationSpecific
             backend:
               service:
-                name: analytics-srv # Make sure this matches your ClusterIP service name
+                name: analytics-srv
                 port:
                   number: 3000
-    - host: link.zeroop.dev
-      http:
-        paths:
           - path: /api/id-gen/next-range
             pathType: ImplementationSpecific
             backend:
@@ -27,9 +25,6 @@ spec:
                 name: counter-srv
                 port:
                   number: 3000
-    - host: link.zeroop.dev
-      http:
-        paths:
           - path: /api/users(/|$)(.*)
             pathType: ImplementationSpecific
             backend:
@@ -37,9 +32,6 @@ spec:
                 name: auth-srv
                 port:
                   number: 3000
-    - host: link.zeroop.dev
-      http:
-        paths:
           - path: /api/url(/|$)(.*)
             pathType: ImplementationSpecific
             backend:
@@ -47,9 +39,8 @@ spec:
                 name: url-srv
                 port:
                   number: 3000
-    - host: link.zeroop.dev
-      http:
-        paths:
+
+          # --- GROUP 2: THE SYSTEM REDIRECT ---
           - path: /r(/|$)(.+)$
             pathType: ImplementationSpecific
             backend:
@@ -57,12 +48,21 @@ spec:
                 name: url-srv
                 port:
                   number: 3000
-    - host: link.zeroop.dev
-      http:
-        paths:
-          # Custom alias redirects live at "/:customAlias"
-          # Match only a single URL segment ("/someAlias"), so it won't shadow "/api/*" or "/r/<code>".
-          - path: /([^/]+)$
+
+          # --- GROUP 3: FRONTEND CLIENT (Catch-all for files/SPA) ---
+          # We place this BEFORE the custom alias so it can catch static assets
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: client-srv 
+                port:
+                  number: 3000
+
+          # --- GROUP 4: CUSTOM ALIAS CATCH ---
+          # FIX: We use a regex that ONLY matches alphanumeric characters.
+          # Because it lacks a '.', it will IGNORE .js, .css, and .ico files.
+          - path: /([a-zA-Z0-9_-]+)$
             pathType: ImplementationSpecific
             backend:
               service:

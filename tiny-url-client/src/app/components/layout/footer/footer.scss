@@ -1,0 +1,89 @@
+.footer {
+    background: #111827; // Deep dark gray
+    color: #d1d5db;
+    padding: 20px 40px 30px 40px;
+    margin-top: 10px;
+    border-top: 1px solid #1f2937;
+  }
+  
+  .footer-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 40px;
+  }
+  
+  .footer-section {
+    flex: 1;
+    min-width: 200px;
+  
+    h3 {
+      color: white;
+      font-size: 1.5rem;
+      margin-bottom: 15px;
+      font-weight: 800;
+    }
+  
+    h4 {
+      color: white;
+      font-size: 1.1rem;
+      margin-bottom: 20px;
+      font-weight: 600;
+    }
+  
+    p {
+      line-height: 1.6;
+      font-size: 0.95rem;
+      color: #9ca3af;
+      max-width: 250px;
+    }
+  
+    a {
+      color: #9ca3af;
+      text-decoration: none;
+      display: block;
+      margin: 10px 0;
+      font-size: 0.9rem;
+      transition: color 0.2s ease;
+  
+      &:hover {
+        color: white;
+      }
+    }
+  }
+  
+  // Custom Status Indicator inside the footer
+  .status-indicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 20px;
+    
+    .dot {
+      height: 8px;
+      width: 8px;
+      background-color: #10b981;
+      border-radius: 50%;
+      box-shadow: 0 0 8px #10b981;
+    }
+  
+    .status-text {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #10b981;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+  }
+  
+  .footer-bottom {
+    max-width: 1200px;
+    margin: 40px auto 0 auto;
+    padding-top: 20px;
+    border-top: 1px solid #1f2937;
+    text-align: center;
+    font-size: 14px;
+    color: #6b7280;
+  }

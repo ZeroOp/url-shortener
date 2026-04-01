@@ -10,8 +10,10 @@
         <mat-icon matPrefix>link</mat-icon>
       </mat-form-field>
   
-      <button mat-flat-button color="primary" class="full-width shorten-btn" (click)="shorten(urlInput.value)">
-        Shorten Now
+      <button mat-flat-button color="primary" 
+        class="full-width shorten-btn" 
+        [disabled]="isLoading" 
+        (click)="shorten(urlInput)"> {{ isLoading ? 'Shortening...' : 'Shorten Now' }}
       </button>
   
       @if (shortenedUrl) {

@@ -5,6 +5,7 @@ import { redisClient } from '../redis-client';
 import { UrlClickedPublisher } from '../events/publishers/url-clicked-publisher';
 import { natsWrapper } from '../nats-wrapper';
 import { UrlClickedEvent } from '@zeroop-dev/common/build/url-shortner/events';
+import { performance } from 'perf_hooks';
 const router = express.Router();
 
 const publishClickEvent = async (event: UrlClickedEvent["data"]) => {
@@ -18,40 +19,48 @@ const publishClickEvent = async (event: UrlClickedEvent["data"]) => {
     }
 }
 
-/**
- * Helper: Process the redirection logic
- * This handles the Cache-Aside pattern + Click tracking
- */
 const handleRedirection = async (shortiUrl: string, req: Request, res: Response) => {
+    // START TIMER: The very first thing we do
+    const start = performance.now(); 
+
     const userAgent = req.headers['user-agent'] || 'unknown';
     const ip = req.ip || 'unknown';
     
+    let longUrl: string | null = null;
+
     // 1. Try Cache First (Redis)
-    const cachedUrl = await redisClient.get(shortiUrl);
-    if (cachedUrl) {
-        console.log("Picked from cache");
-        publishClickEvent({ shortUrl : shortiUrl, ip ,userAgent, timestamp: new Date().toISOString() });
-        return res.redirect(cachedUrl);
-    }
+    longUrl = await redisClient.get(shortiUrl);
     
-    // 2. Database Fallback
-    const url = await Url.findOne({ 
+    // 2. Database Fallback if not in Redis
+    if (!longUrl) {
+        const url = await Url.findOne({ 
+            shortUrl: shortiUrl, 
+            status: UrlStatus.Active 
+        });
+
+        if (!url) {
+            throw new NotFoundError();
+        }
+        
+        longUrl = url.longUrl;
+        // Update Cache for 24 hours
+        await redisClient.setex(shortiUrl, 86400, longUrl);
+    }
+
+    // STOP TIMER: Right before we send the response
+    const end = performance.now();
+    const processingTimeMs = parseFloat((end - start).toFixed(3)); // e.g., 1.452ms
+
+    // 3. Publish Event with Latency
+    publishClickEvent({ 
         shortUrl: shortiUrl, 
-        status: UrlStatus.Active 
+        ip, 
+        userAgent, 
+        timestamp: new Date().toISOString(),
+        processingTimeMs // Now sending the actual measured time
     });
 
-    if (!url) {
-        throw new NotFoundError();
-    }
-
-
-    // 3. Update Cache & Increment Clicks
-    // Cache for 24 hours to handle "Viral" links efficiently
-    // For ioredis / Cluster mode:
-    await redisClient.setex(shortiUrl, 86400, url.longUrl);
-    
-    publishClickEvent({ shortUrl : shortiUrl, ip ,userAgent, timestamp: new Date().toISOString() });
-    return res.status(302).redirect(url.longUrl);
+    return res.status(301).redirect(longUrl);
 };
 /**
  * Endpoint 1: Random Stream
