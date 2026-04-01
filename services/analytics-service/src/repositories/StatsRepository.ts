@@ -135,4 +135,33 @@ export class StatsRepository {
       clicks: Number(row.clicks)
     }));
   }
+
+  /**
+   * Gets total click counts for all links belonging to a user.
+   * Returns an array of { shortUrl: string, count: number }
+   */
+  async getAllLinkCounts(userId: string): Promise<{ shortUrl: string, count: number }[]> {
+    const rs = await this.client.query({
+      query: `
+        SELECT 
+          meta.shortUrl as shortUrl, 
+          sum(stats.total_clicks) as count
+        FROM analytics.url_metadata meta FINAL
+        -- Added GLOBAL keyword here to fix distributed join error
+        GLOBAL LEFT JOIN analytics.daily_stats stats ON meta.shortUrl = stats.shortUrl
+        WHERE meta.userId = {uid:String}
+        GROUP BY meta.shortUrl
+      `,
+      query_params: { uid: userId },
+      format: 'JSONEachRow',
+    });
+  
+    const rows = await rs.json() as { shortUrl: string, count: string | number }[];
+    
+    return rows.map(row => ({
+      shortUrl: row.shortUrl,
+      count: Number(row.count) || 0 
+    }));
+  }
+
 }

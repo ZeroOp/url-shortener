@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit } from '@angular/core'; // Added OnInit
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
@@ -12,49 +12,46 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatTableModule } from '@angular/material/table';
 import { MatIconModule } from '@angular/material/icon';
-import { MatProgressSpinnerModule } from "@angular/material/progress-spinner"; // Ensure Module is imported
+import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar'; // Added for copy feedback
 
 // Service & Types
-import { UrlService, ShortenResponse } from '../../core/services/url';
+import { UrlService, ShortenResponse, UrlStatus } from '../../core/services/url';
 
 export interface RecentLink {
   shortUrl: string;
   longUrl: string;
   createdAt: Date | string;
+  status: UrlStatus;
+  isAliased: boolean;
 }
 
 @Component({
   selector: 'app-create-link-tab',
   standalone: true,
   imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    MatCardModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatButtonModule,
-    MatCheckboxModule,
-    MatDatepickerModule,
-    MatNativeDateModule,
-    MatTableModule,
-    MatIconModule,
-    MatProgressSpinnerModule
+    CommonModule, ReactiveFormsModule, MatCardModule, MatFormFieldModule,
+    MatInputModule, MatButtonModule, MatCheckboxModule, MatDatepickerModule,
+    MatNativeDateModule, MatTableModule, MatIconModule, MatProgressSpinnerModule,
+    MatSnackBarModule
   ],
   templateUrl: './create-link-tab.html',
   styleUrl: './create-link-tab.scss'
 })
-export class CreateLinkTab implements OnInit { // Implement OnInit
+export class CreateLinkTab implements OnInit {
   private fb = inject(FormBuilder);
-  private urlService = inject(UrlService); // Injected via field for cleaner access
+  private urlService = inject(UrlService);
+  private snackBar = inject(MatSnackBar);
   
-  linkForm!: FormGroup; // Use definite assignment
+  linkForm!: FormGroup; 
   recentLinks = signal<RecentLink[]>([]);
   isLoading = signal(false);
   lastCreatedUrl = signal<string | null>(null);
+  readonly DOMAIN = 'zeroop.dev';
 
   ngOnInit() {
     this.initForm();
-    this.loadRecentLinks(); // Fetch data from MongoDB on startup
+    this.loadRecentLinks();
   }
 
   private initForm() {
@@ -63,10 +60,9 @@ export class CreateLinkTab implements OnInit { // Implement OnInit
       hasAlias: [false],
       alias: [''],
       expiresAt: [null],
-      expiresTime: [''] // Start empty so it's clear no time is set
+      expiresTime: ['']
     });
-  
-    // Toggle alias validation based on checkbox
+
     this.linkForm.get('hasAlias')?.valueChanges.subscribe(checked => {
       const aliasControl = this.linkForm.get('alias');
       if (checked) {
@@ -79,17 +75,16 @@ export class CreateLinkTab implements OnInit { // Implement OnInit
     });
   }
 
-  // --- THE NEW METHOD ---
   private loadRecentLinks() {
     this.urlService.getRecentLinks().subscribe({
       next: (data: ShortenResponse[]) => {
-        // Map the backend data to our local signal
-        const mappedData: RecentLink[] = data.map(item => ({
+        this.recentLinks.set(data.map(item => ({
           shortUrl: item.shortUrl,
           longUrl: item.longUrl,
-          createdAt: item.createdAt
-        }));
-        this.recentLinks.set(mappedData);
+          createdAt: item.createdAt,
+          status: item.status,
+          isAliased: item.isAliased
+        })));
       },
       error: (err) => console.error('History fetch failed:', err)
     });
@@ -98,39 +93,27 @@ export class CreateLinkTab implements OnInit { // Implement OnInit
   onSubmit() {
     if (this.linkForm.invalid) return;
     this.isLoading.set(true);
-  
+
     const { longUrl, hasAlias, alias, expiresAt, expiresTime } = this.linkForm.value;
-  
     const options: any = {};
     if (hasAlias && alias) options.alias = alias;
-  
-    // ✅ STRICTOR LOGIC: Only process expiration if a DATE is selected
+
     if (expiresAt) {
       const expiration = new Date(expiresAt);
       if (expiresTime) {
         const [hours, minutes] = expiresTime.split(':');
         expiration.setHours(Number(hours), Number(minutes), 0, 0);
       } else {
-        // If date is picked but no time, default to end of day
         expiration.setHours(23, 59, 59, 999);
       }
       options.expiresAt = expiration.toISOString();
     }
-  
+
     this.urlService.shortenUrl(longUrl, options).subscribe({
       next: (res) => {
-        this.lastCreatedUrl.set(res.shortUrl);
+        this.lastCreatedUrl.set(this.formatShortUrl(res.shortUrl, res.isAliased));
         this.updateRecentLinksTable(res);
-        
-        // ✅ BETTER RESET: Clears the form and validation state properly
-        this.linkForm.reset({
-          longUrl: '',
-          hasAlias: false,
-          alias: '',
-          expiresAt: null,
-          expiresTime: ''
-        });
-        
+        this.linkForm.reset({ longUrl: '', hasAlias: false, alias: '', expiresAt: null, expiresTime: '' });
         this.isLoading.set(false);
       },
       error: (err) => {
@@ -144,13 +127,19 @@ export class CreateLinkTab implements OnInit { // Implement OnInit
     const newLink: RecentLink = {
       shortUrl: res.shortUrl,
       longUrl: res.longUrl,
-      createdAt: res.createdAt
+      createdAt: res.createdAt,
+      status: res.status,
+      isAliased: res.isAliased
     };
-    // Add to the beginning of the signal array
     this.recentLinks.update(current => [newLink, ...current].slice(0, 10));
   }
 
-  copyToClipboard(url: string) {
-    navigator.clipboard.writeText(url);
+  formatShortUrl(code: string, isAliased: boolean): string {
+    return isAliased ? `${this.DOMAIN}/${code}` : `${this.DOMAIN}/r/${code}`;
+  }
+
+  copyToClipboard(text: string, message: string = 'Copied to clipboard!') {
+    navigator.clipboard.writeText(text);
+    this.snackBar.open(message, 'Close', { duration: 2000, panelClass: ['custom-snack'] });
   }
 }

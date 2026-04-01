@@ -38,4 +38,16 @@ router.get('/api/analytics/top-links',requireAuth, async (req, res) => {
     }
 });
 
+// 4. Bulk counts for the "All Links" table
+router.get('/api/analytics/counts', requireAuth, async (req, res) => { 
+    try {
+        const userId = req.currentUser!.id;
+        const counts = await clickhouseWrapper.stats.getAllLinkCounts(userId);
+        res.send(counts);
+    } catch (err) {
+        console.error('[Analytics] Bulk Counts Error:', err);
+        res.status(500).send({ error: 'Failed to fetch click counts' });
+    }
+});
+
 export { router as dashboardRouter };
