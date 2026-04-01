@@ -11,19 +11,21 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { AuthLayoutComponent } from "../../core/layouts/auth-layout/auth-layout";
 
 @Component({
   selector: 'app-signin',
   standalone: true,
   imports: [
-    ReactiveFormsModule, 
-    MatCardModule, 
-    MatFormFieldModule, 
-    MatInputModule, 
-    MatButtonModule, 
+    ReactiveFormsModule,
+    MatCardModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
     MatIconModule,
-    MatProgressBarModule
-  ],
+    MatProgressBarModule,
+    AuthLayoutComponent
+],
   templateUrl: './signin.html',
   styleUrl: './signin.scss'
 })

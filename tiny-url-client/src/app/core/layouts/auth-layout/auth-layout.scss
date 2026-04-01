@@ -1,0 +1,56 @@
+.split-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: calc(100vh - 120px);
+    padding: 2rem;
+    background: #f1f5f9;
+  }
+  
+  .auth-wrapper {
+    display: flex;
+    width: 100%;
+    max-width: 1000px;
+    min-height: 600px;
+    background: white;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  }
+  
+  .brand-section {
+    flex: 1;
+    background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%);
+    color: white;
+    padding: 3rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  
+    .logo-icon { font-size: 48px; width: 48px; height: 48px; color: #a5b4fc; margin-bottom: 1rem; }
+    h1 { font-size: 2.5rem; font-weight: 800; line-height: 1.2; margin-bottom: 1rem; }
+    p { font-size: 1.1rem; color: #e0e7ff; margin-bottom: 2rem; line-height: 1.6; }
+  
+    .feature {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 1rem;
+      font-size: 1rem;
+      mat-icon { font-size: 20px; width: 20px; height: 20px; color: #818cf8; }
+    }
+  }
+  
+  .form-section {
+    flex: 1;
+    padding: 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+  }
+  
+  @media (max-width: 850px) {
+    .auth-wrapper { flex-direction: column; max-width: 450px; }
+    .brand-section { display: none; }
+  }

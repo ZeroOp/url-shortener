@@ -1,0 +1,43 @@
+.signup-card {
+    width: 100%;
+    max-width: 380px;
+    border: none;
+    box-shadow: none;
+    background: transparent;
+  
+    mat-card-header {
+      margin-bottom: 1.5rem;
+      padding: 0;
+      mat-card-title { font-size: 1.8rem; font-weight: 700; color: #1f2937; }
+      mat-card-subtitle { color: #64748b; }
+    }
+    mat-card-content { padding: 0; }
+  }
+  
+  .full-width { width: 100%; margin-bottom: 1rem; }
+  
+  .submit-btn {
+    width: 100%;
+    padding: 1.5rem !important;
+    font-weight: 600 !important;
+    font-size: 1rem !important;
+    margin-top: 1rem;
+    border-radius: 8px !important;
+    background-color: #1f2937 !important;
+    color: white !important;
+  }
+  
+  .footer-link {
+    display: block;
+    margin-top: 1.5rem;
+    text-align: center;
+    color: #64748b;
+    font-size: 0.9rem;
+  
+    span {
+      color: #4f46e5;
+      font-weight: 600;
+      cursor: pointer;
+      &:hover { text-decoration: underline; }
+    }
+  }
