@@ -1,37 +1,41 @@
-# Project Documentation
+# ZeroOp URL Shortener 🚀
+**A high-performance, distributed, and event-driven URL shortening platform.**
 
-Welcome to the URL Shortener project documentation. Below are the detailed docs for each part of the system:
+This project is built to handle massive scale using a microservices architecture, featuring real-time analytics, automated link expiration, and high-availability database clustering.
 
-- [Overall Architecture](docs/architecture.md)
-- [Auth Service](docs/auth-service.md)
-- [URL Service](docs/url-service.md)
-- [Analytics Service](docs/analytics-service.md)
-- [Counter Service](docs/counter-service.md)
-- [Database Schema](docs/database.md)
-- [Caching Strategy](docs/caching.md)
+---
 
-when you run the setup for the first time need to setup the replica sets
+## 🏗️ System Architecture
+The system is composed of several independent services communicating over an asynchronous event bus (NATS).
 
-kubectl exec -it mongo-0 -- mongosh --eval "rs.initiate({_id:'rs0',members:[{_id:0,host:'<IP_OF_MONGO_0>:27017'},{_id:1,host:'<IP_OF_MONGO_1>:27017'},{_id:2,host:'<IP_OF_MONGO_2>:27017'}]})"
+![System Architecture](./images/image_d43558.png)
 
-$ips = (kubectl get pods -l app=redis-cluster -o jsonpath='{range .items[*]}{.status.podIP}:6379 {end}').Split(' ', [System.StringSplitOptions]::RemoveEmptyEntries); kubectl exec -it redis-cluster-0 -- redis-cli --cluster create $ips --cluster-replicas 1 --cluster-yes
+---
 
-The Solution: Create the Materialized View
-You need to create a "trigger" that watches link_clicks and automatically updates daily_stats. Run this command in your PowerShell to apply it to clickhouse-0:
+## 📂 Documentation Modules
+Click on the links below to dive into the technical details of each component:
 
-PowerShell
+| Service / Module | Description | Link |
+| :--- | :--- | :--- |
+| **Architecture** | High-level design, data flow, and trade-offs. | [Read Docs](./architecture.md) |
+| **Auth Service** | Identity management and JWT-based security. | [Read Docs](./auth-service.md) |
+| **URL Service** | The core redirection engine and link management. | [Read Docs](./url-service.md) |
+| **Counter Service** | Distributed ID generation for short codes. | [Read Docs](./counter-service.md) |
+| **Analytics Service** | ClickHouse-powered real-time tracking and MVs. | [Read Docs](./analytics-service.md) |
+| **Expiration Service** | TTL management and automated link cleanup. | [Read Docs](./expiration.md) |
+| **Database Layer** | MongoDB & ClickHouse cluster configurations. | [Read Docs](./database.md) |
 
-kubectl exec -it clickhouse-0 -- clickhouse-client --query "CREATE MATERIALIZED VIEW IF NOT EXISTS analytics.link_clicks_mv TO analytics.daily_stats AS SELECT shortUrl, toDate(timestamp) AS date, count() AS total_clicks FROM analytics.link_clicks GROUP BY shortUrl, date"
+---
 
-Why this fixes it:
-Automatic Updates: Every time your analytics-service inserts a new row into link_clicks, this view will immediately increment the total_clicks in daily_stats.
+## 🚀 Quick Start (Local Development)
+1. **Prerequisites:** Docker, Kubernetes (minikube/kind), and Helm.
+2. **Setup Cluster:** `kubectl apply -f ./k8s`
+3. **Initialize Databases:** See the [Database Docs](./database.md) for ClickHouse migrations.
 
-Date-Based Sharding: It converts your high-precision timestamp into a simple date so your daily counts stay organized.
+---
 
-Matches your Query: Since your getAllLinkCounts API joins with daily_stats, it will finally see the numbers it’s looking for.
-
-One Important Note (Historical Data)
-Materialized Views in ClickHouse only process new data inserted after the view is created. Since you already have 7 clicks in there, they won't automatically show up in daily_stats.
-
-To move those existing 7 clicks over right now, run this:
-
+## 🛠️ Technology Stack
+- **Languages:** TypeScript (Node.js), Angular (Frontend).
+- **Communication:** NATS Streaming (Event Bus), gRPC/REST.
+- **Databases:** MongoDB (Metadata), Redis (Cache), ClickHouse (Analytics).
+- **Orchestration:** Kubernetes, Docker, Ingress-Nginx.

@@ -1,182 +1,49 @@
-# URL Shortener Architecture
+# 📊 Analytics Service
 
-## Architecture Design
-
-![Architecture Diagram](./Images/architecture.png)
+The Analytics Service is a high-throughput, event-driven microservice responsible for tracking, processing, and aggregating every interaction with a short URL. It leverages **ClickHouse** to provide real-time insights with sub-second query latency.
 
 ---
 
-## Overview
-This system is designed as a microservices-based URL shortener with scalability, fault tolerance, and asynchronous processing in mind. It uses an API Gateway, multiple services, distributed storage, caching, and an event-driven architecture.
+## 🛠️ Core Responsibilities
+
+- **Event Ingestion:** Listens to the `url:clicked` and `url:deleted` subjects on the **NATS Streaming** bus.
+- **Metadata Synchronization:** Maintains a mirrored state of URL metadata (Short URL, Long URL, UserID) within ClickHouse to allow for "stitched" API responses.
+- **Data Transformation:** Normalizes high-resolution browser timestamps into ClickHouse-compatible formats (removing 'T' and 'Z' markers).
+- **Real-Time Aggregation:** Orchestrates the flow of raw click events into pre-aggregated summary tables via Materialized Views.
 
 ---
 
-## High-Level Flow
+## 🗄️ ClickHouse Architecture (High Availability)
 
-1. Client sends request to API Gateway  
-2. API Gateway routes request to appropriate service  
-3. Services communicate with databases and event bus  
-4. Asynchronous processing handled via event streaming  
-5. Cached responses served for high performance  
+The storage layer is designed as a distributed cluster to ensure zero data loss and horizontal scalability.
 
----
-
-## Components
-
-### 1. API Gateway
-- Single entry point for all requests
-- Routes traffic to:
-  - Auth Service
-  - URL Service
-  - Analytics Service
-- Handles request validation and routing
+- **Cluster Configuration:** `url_analytics_cluster`
+- **Topology:** 2 Shards × 2 Replicas = **4 Dedicated Nodes** (`clickhouse-0` through `clickhouse-3`).
+- **Engine:** Uses the `ReplicatedMergeTree` family with **Zookeeper** for coordination.
 
 ---
 
-### 2. Auth Service
-- Manages user authentication and authorization
-- Stores user data in MongoDB
-- Publishes `UserCreated` events to event bus
+## 🔄 The Data Pipeline (The "Bridge")
+
+We implement an **OLAP (Online Analytical Processing)** pattern to separate raw logs from display-ready stats.
+
+1. **Raw Table (`link_clicks`):** A distributed table that stores every individual click (IP, User Agent, Timestamp).
+2. **The Worker (`link_clicks_mv`):** A Materialized View that acts as an internal trigger. It "watches" the raw table and automatically calculates daily totals.
+3. **Summary Table (`daily_stats`):** A `SummingMergeTree` table that stores the final counts. The frontend queries this table for the Management Dashboard, ensuring the UI stays fast even with millions of clicks.
 
 ---
 
-### 3. URL Service
-- Core service of the system
-- Responsibilities:
-  - Generate short URLs
-  - Handle redirection
+## 🛡️ Error Handling & Consistency
 
-#### Short URL Generation Strategy
-- Does **not** generate IDs independently to avoid collisions
-- Requests a **batch (range)** of IDs (e.g., 1000–2000) from Counter Service
-- Uses a **bijective function (e.g., Base62 encoding)** on the counter value to generate short URLs
-- Each instance works on its assigned range → ensures:
-  - No collisions
-  - No coordination between instances
-  - High throughput
-
-#### Storage
-- Cassandra → primary DB (URL mappings)
-- Redis → cache for hot URLs
-
-#### Events
-- Publishes:
-  - `URLCreated`
-  - `URLAccessed`
+- **Strict Typing:** The service automatically handles ISO-8601 string conversions to prevent ClickHouse insertion failures (`CANNOT_PARSE_INPUT_ASSERTION_FAILED`).
+- **Idempotency:** Uses a `version` column (based on `Date.now()`) in the `url_metadata` table. Combined with `ReplacingMergeTree`, this ensures the latest state (like a 'deleted' status) always wins during background merges.
+- **Graceful Degradation:** If ClickHouse is temporarily unreachable, the service stays alive and allows NATS to retry message delivery, ensuring no click data is ever dropped.
 
 ---
 
-### 4. Counter Service
-- Responsible for **unique ID generation**
-- Allocates **ID ranges (batches)** to URL Service instances
-  - Example: Instance A → 1–1000, Instance B → 1001–2000
-- Ensures:
-  - No overlap between instances
-  - Distributed ID generation
-- Can use atomic counters or sequence management internally
-- Reduces contention and avoids central bottleneck
+## 📡 API Endpoints
 
----
-
-### 5. Analytics Service
-- Processes user behavior and click analytics
-- Consumes events from event bus
-- Stores aggregated data in MongoDB
-
----
-
-### 6. Event Bus (NATS Streaming)
-- Enables asynchronous communication
-- Decouples services
-- Handles:
-  - URL events
-  - User events
-  - Click events
-
----
-
-### 7. Event Store (S3)
-- Stores event logs for replay and debugging
-- Helps in rebuilding state if needed
-
----
-
-### 8. Databases
-
-#### Cassandra
-- Used by URL Service
-- Distributed, highly scalable
-- Stores URL mappings
-
-#### MongoDB
-- Used by:
-  - Auth Service
-  - Analytics Service
-- Stores user and analytics data
-
-#### Redis
-- Used by URL Service
-- Caches frequently accessed URLs
-- Reduces database load
-
----
-
-## Request Flows
-
-### 1. Create Short URL
-1. Client → API Gateway  
-2. API Gateway → Auth Service (validate user)  
-3. API Gateway → URL Service  
-4. URL Service:
-   - Requests ID batch from Counter Service (if not available)
-   - Picks next ID from its range
-   - Converts ID → short URL using bijective function (Base62)
-   - Stores mapping in Cassandra
-   - Caches in Redis
-   - Publishes `URLCreated` event  
-5. Event consumed by Analytics & Counter services  
-
----
-
-### 2. Redirect Short URL
-1. Client → API Gateway  
-2. API Gateway → URL Service  
-3. URL Service:
-   - Checks Redis cache  
-   - If miss → fetch from Cassandra  
-   - Returns original URL  
-   - Publishes `URLAccessed` event  
-4. Counter & Analytics updated asynchronously  
-
----
-
-### 3. Analytics Processing
-1. Events received from event bus  
-2. Analytics Service processes data  
-3. Stores results in MongoDB  
-
----
-
-## Key Design Decisions
-
-- **Batch ID Allocation** → reduces contention and improves scalability  
-- **Bijective Encoding (Base62)** → compact, unique, collision-free short URLs  
-- **Microservices Architecture** → independent scaling  
-- **Event-Driven System** → loose coupling, async processing  
-- **Cassandra** → high write throughput  
-- **Redis Cache** → low latency reads  
-- **NATS Streaming** → reliable event delivery  
-- **S3 Event Store** → durability and replay capability  
-
----
-
-## Benefits
-
-- No ID collisions
-- Horizontally scalable URL generation
-- Low latency redirects
-- Reduced database load via caching
-- Fully asynchronous analytics pipeline
-- Fault-tolerant and extensible system
-
----
+| Endpoint | Method | Description |
+| :--- | :--- | :--- |
+| `/api/analytics/counts` | `GET` | Returns aggregated click counts for all links owned by the user. |
+| `/api/analytics/stats/:code` | `GET` | Returns detailed time-series data for a specific short link. |
