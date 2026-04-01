@@ -8,7 +8,7 @@ This project is built to handle massive scale using a microservices architecture
 ## 🏗️ System Architecture
 The system is composed of several independent services communicating over an asynchronous event bus (NATS).
 
-![System Architecture](./images/image_d43558.png)
+![System Architecture](./docs/Images/architecture.png)
 
 ---
 
