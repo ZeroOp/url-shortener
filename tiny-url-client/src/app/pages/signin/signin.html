@@ -13,7 +13,7 @@
         <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
           <mat-form-field appearance="outline" class="full-width">
             <mat-label>Email Address</mat-label>
-            <input matInput formControlName="email">
+            <input matInput formControlName="email" placeholder="ram@cisco.com">
             <mat-icon matSuffix>alternate_email</mat-icon>
           </mat-form-field>
   
@@ -25,9 +25,13 @@
             </button>
           </mat-form-field>
   
-          <button mat-flat-button color="primary" class="submit-btn" [disabled]="loginForm.invalid || isLoading()">
+          <button mat-flat-button class="submit-btn" [disabled]="loginForm.invalid || isLoading()">
             Log In to Dashboard
           </button>
+  
+          <div class="footer-link">
+            Don't have an account? <span routerLink="/signup">Sign Up</span>
+          </div>
         </form>
       </mat-card-content>
     </mat-card>

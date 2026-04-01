@@ -11,6 +11,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { AuthLayoutComponent } from '../../core/layouts/auth-layout/auth-layout';
+import { NotificationService } from '../../core/services/notification';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-signup',
@@ -33,6 +35,11 @@ export class SignupComponent {
   private fb = inject(FormBuilder);
   private http = inject(HttpClient);
   private router = inject(Router);
+
+  constructor(private snackBar: MatSnackBar) {
+
+  }
+  
 
   isLoading = signal(false);
   hidePassword = signal(true);
@@ -63,9 +70,34 @@ export class SignupComponent {
         },
         error: (err) => {
           this.isLoading.set(false);
-          alert('Registration failed. Email might already be in use.');
+          const errorMessage = err.error.errors[0]?.message || 'Regisration failed. Please try again.';
+          console.log(err.error);
+          this.snackBar.open(errorMessage, 'Close', {
+            duration: 5000,
+            panelClass: ['error-snackbar', 'top-margin-snackbar'],
+            verticalPosition: 'bottom'
+          });
         }
       });
+    } else {
+      let errorMessage = 'Please correct the errors in the form.';
+
+      if (this.signupForm.hasError('passwordMismatch')) {
+        errorMessage = 'Passwords do not match!';
+      } else if (this.signupForm.get('email')?.hasError('email')) {
+        errorMessage = 'Please enter a valid email address.';
+      } else if (this.signupForm.get('password')?.hasError('minlength')) {
+        errorMessage = 'Password must be at least 4 characters.';
+      }
+
+      this.showError(errorMessage);
     }
+  }
+  private showError(message: string) {
+    this.snackBar.open(message, 'Close', {
+      duration: 5000,
+      panelClass: ['error-snackbar', 'top-margin-snackbar'],
+      verticalPosition: 'bottom'
+    });
   }
 }

@@ -62,4 +62,45 @@ export class AuthService {
     this.userState.set(null);
     this.isLoaded = false;
   }
+
+  /**
+   * Performs the actual Sign In.
+   * Backend sets the session cookie, and returns the User object.
+   */
+  signin(credentials: { email?: string | null; password?: string | null }): Observable<User> {
+    return this.http.post<User>('/api/users/signin', credentials, {
+      withCredentials: true // Crucial for cookie-based auth
+    }).pipe(
+      tap((user) => {
+        this.userState.set(user); // Update the signal so the whole app knows we are logged in
+        this.isLoaded = true;
+      })
+    );
+  }
+
+  /**
+   * Performs the Sign Up.
+   */
+  signup(userData: { email?: string | null; password?: string | null }): Observable<User> {
+    return this.http.post<User>('/api/users/signup', userData, {
+      withCredentials: true
+    }).pipe(
+      tap((user) => {
+        this.userState.set(user);
+        this.isLoaded = true;
+      })
+    );
+  }
+
+  /**
+   * Performs Logout on the server (clears the cookie) and the client.
+   */
+  logout(): Observable<void> {
+    return this.http.post<void>('/api/users/signout', {}, { withCredentials: true }).pipe(
+      tap(() => {
+        this.clearAuth();
+      })
+    );
+  }
+
 }
