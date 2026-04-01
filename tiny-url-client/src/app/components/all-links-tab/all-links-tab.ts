@@ -11,6 +11,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { DeleteConfirmDialogComponent } from '../delete-confirm-dialog/delete-confirm-dialog';
+import { MatDialog } from '@angular/material/dialog';
 
 export interface LinkWithStats {
   id: string;
@@ -83,15 +85,27 @@ export class AllLinksTab implements OnInit {
     this.snackBar.open('Link copied!', 'OK', { duration: 2000 });
   }
 
-  onDelete(linkId: string) {
-    if (confirm('Are you sure you want to delete this link? This action cannot be undone.')) {
+  // 1. Add MatDialog to your imports list in the @Component decorator
+// 2. Inject it: 
+private dialog = inject(MatDialog);
+
+onDelete(linkId: string) {
+  const dialogRef = this.dialog.open(DeleteConfirmDialogComponent, {
+    width: '400px',
+    height: '200px', // Adjusted to fit your 100-200px requirement
+    backdropClass: 'blur-backdrop',
+    disableClose: true // User must click a button to close
+  });
+
+  dialogRef.afterClosed().subscribe(confirmed => {
+    if (confirmed) {
       this.http.delete(`/api/url/${linkId}`).subscribe({
         next: () => {
           this.dataSource.update(links => links.filter(l => l.id !== linkId));
-          this.snackBar.open('Link deleted successfully', 'Close', { duration: 3000 });
-        },
-        error: () => this.snackBar.open('Delete failed', 'Close', { duration: 3000 })
+          this.snackBar.open('Link deleted', 'OK', { duration: 2000 });
+        }
       });
     }
-  }
+  });
+}
 }

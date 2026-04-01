@@ -49,4 +49,4 @@ class ClickHouseWrapper {
   }
 }
 
-export const clickhouseWrapper = new ClickHouseWrapper();
+export const  clickhouseWrapper = new ClickHouseWrapper();

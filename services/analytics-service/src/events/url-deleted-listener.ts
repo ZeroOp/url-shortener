@@ -15,6 +15,7 @@ export class UrlDeletedListener extends Listener<UrlDeletedEvent> {
             // This ensures we don't lose the original longUrl or userId in the ClickHouse record
             const existing = await clickhouseWrapper.metadata.getLatest(shortUrl);
 
+            const formattedDate = new Date().toISOString().replace('T', ' ').replace('Z', '');
             // 2. Upsert the 'deleted' status
             await clickhouseWrapper.metadata.upsert({
                 shortUrl,
@@ -22,7 +23,7 @@ export class UrlDeletedListener extends Listener<UrlDeletedEvent> {
                 userId: existing?.userId ?? 'anonymous',
                 status: 'deleted',
                 version: Date.now(), // Higher version ensures this 'deleted' status wins the merge
-                updated_at: new Date().toISOString()
+                updated_at: formattedDate
             });
 
             // 3. Acknowledge the message
