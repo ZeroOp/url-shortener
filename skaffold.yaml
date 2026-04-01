@@ -8,15 +8,15 @@ build:
     push: false  
 
   artifacts:
-    - image: zeroop/url-shortner-client
-      context: tiny-url-client
-      docker:
-        dockerfile: Dockerfile
-      sync:
-        manual:
-          # Syncs your Angular source files directly to the container
-          - src: "src/**/*.{ts,html,scss}" 
-            dest: .
+    # - image: zeroop/url-shortner-client
+    #   context: tiny-url-client
+    #   docker:
+    #     dockerfile: Dockerfile
+    #   sync:
+    #     manual:
+    #       # Syncs your Angular source files directly to the container
+    #       - src: "src/**/*.{ts,html,scss}" 
+    #         dest: .
     - image: zeroop/url-shortner-auth-service
       context: services/auth-service
       docker:

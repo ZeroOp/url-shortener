@@ -1,64 +1,72 @@
 <div class="tab-container">
     <mat-card class="form-card mat-elevation-z0">
-        <mat-card-header>
-          <mat-card-title>Create New Link</mat-card-title>
-        </mat-card-header>
-    
-        <mat-card-content>
-          <form [formGroup]="linkForm" (ngSubmit)="onSubmit()" class="link-form">
-            
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Destination URL</mat-label>
-              <input matInput placeholder="https://github.com/ramavath-jayaram" formControlName="longUrl">
-              <mat-icon matSuffix style="color: #94a3b8">link</mat-icon>
-            </mat-form-field>
-    
-            <div class="options-row">
-                <mat-checkbox formControlName="hasAlias" color="primary">
-                  <span style="font-weight: 500; color: #475569">Custom Alias</span>
-                </mat-checkbox>
-              
-                <div class="datetime-container">
-                  <mat-form-field appearance="outline" subsriptSizing="dynamic">
-                    <mat-label>Expiry Date</mat-label>
-                    <input matInput [matDatepicker]="picker" formControlName="expiresAt">
-                    <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
-                    <mat-datepicker #picker></mat-datepicker>
-                  </mat-form-field>
-              
-                  <mat-form-field appearance="outline" subsriptSizing="dynamic">
-                    <mat-label>Time</mat-label>
-                    <input matInput type="time" formControlName="expiresTime">
-                    <mat-icon matSuffix>schedule</mat-icon>
-                  </mat-form-field>
-                </div>
-              </div>
-    
-            @if (linkForm.get('hasAlias')?.value) {
-              <mat-form-field appearance="outline" class="full-width animate-fade">
-                <mat-label>Custom Path</mat-label>
-                <input matInput placeholder="portfolio-2026" formControlName="alias">
-                <span matPrefix class="alias-prefix">zeroop.dev / </span>
-              </mat-form-field>
+      <mat-card-header>
+        <mat-card-title>Create New Link</mat-card-title>
+      </mat-card-header>
+  
+      <mat-card-content>
+        <form [formGroup]="linkForm" (ngSubmit)="onSubmit()" class="link-form">
+          
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Destination URL</mat-label>
+            <input matInput placeholder="https://github.com/ramavath-jayaram" formControlName="longUrl">
+            <mat-icon matSuffix style="color: #94a3b8">link</mat-icon>
+            @if (linkForm.get('longUrl')?.errors?.['pattern']) {
+              <mat-error>Please enter a valid URL (include http:// or https://)</mat-error>
             }
-    
-            <button mat-flat-button color="primary" class="submit-btn" [disabled]="linkForm.invalid || isLoading()">
-              @if (isLoading()) {
-                <mat-icon><mat-spinner diameter="18"></mat-spinner></mat-icon>
-              } @else {
-                Shorten Now
+          </mat-form-field>
+  
+          <div class="options-row">
+            <mat-checkbox formControlName="hasAlias" color="primary">
+              <span style="font-weight: 500; color: #475569">Custom Alias</span>
+            </mat-checkbox>
+          
+            <div class="datetime-container">
+              <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                <mat-label>Expiry Date</mat-label>
+                <input matInput [matDatepicker]="picker" formControlName="expiresAt">
+                <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+                <mat-datepicker #picker></mat-datepicker>
+              </mat-form-field>
+          
+              <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                <mat-label>Time</mat-label>
+                <input matInput type="time" formControlName="expiresTime">
+                <mat-icon matSuffix>schedule</mat-icon>
+              </mat-form-field>
+            </div>
+          </div>
+  
+          @if (linkForm.get('hasAlias')?.value) {
+            <mat-form-field appearance="outline" class="full-width animate-fade">
+              <mat-label>Custom Path</mat-label>
+              <input matInput placeholder="portfolio-2026" formControlName="alias">
+              <span matPrefix class="alias-prefix">zeroop.dev / </span>
+              @if (linkForm.get('alias')?.errors?.['required']) {
+                <mat-error>Alias is required when using a custom path</mat-error>
               }
-            </button>
-          </form>
-        </mat-card-content>
-      </mat-card>
+            </mat-form-field>
+          }
+  
+          <button mat-flat-button color="primary" class="submit-btn" [disabled]="linkForm.invalid || isLoading()">
+            @if (isLoading()) {
+              <mat-spinner diameter="18"></mat-spinner>
+            } @else {
+              <span>Shorten Now</span>
+            }
+          </button>
+        </form>
+      </mat-card-content>
+    </mat-card>
   
     @if (lastCreatedUrl()) {
       <div class="success-banner animate-fade">
         <p>Success! Your short link is ready:</p>
         <div class="url-display">
           <strong>{{ lastCreatedUrl() }}</strong>
-          <button mat-icon-button (click)="copyToClipboard(lastCreatedUrl()!)"><mat-icon>content_copy</mat-icon></button>
+          <button mat-icon-button (click)="copyToClipboard(lastCreatedUrl()!)">
+            <mat-icon>content_copy</mat-icon>
+          </button>
         </div>
       </div>
     }
@@ -67,6 +75,7 @@
       <h3>Recently Created Links</h3>
       <mat-card class="table-card">
         <table mat-table [dataSource]="recentLinks()">
+          
           <ng-container matColumnDef="shortUrl">
             <th mat-header-cell *matHeaderCellDef>Short URL</th>
             <td mat-cell *matCellDef="let link"><strong>{{ link.shortUrl }}</strong></td>
@@ -83,11 +92,11 @@
           </ng-container>
   
           <tr mat-header-row *matHeaderRowDef="['shortUrl', 'longUrl', 'createdAt']"></tr>
-          <tr mat-row *trRowDef="let row; columns: ['shortUrl', 'longUrl', 'createdAt']"></tr>
+          <tr mat-row *matRowDef="let row; columns: ['shortUrl', 'longUrl', 'createdAt']"></tr>
         </table>
   
         @if (recentLinks().length === 0) {
-          <div class="empty-state">No links created in this session yet.</div>
+          <div class="empty-state">No links found. Start by shortening a URL!</div>
         }
       </mat-card>
     </div>

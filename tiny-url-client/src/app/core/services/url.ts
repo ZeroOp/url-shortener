@@ -25,10 +25,19 @@ export interface ShortenResponse {
   providedIn: 'root',
 })
 export class UrlService {
-  // Ensure this matches your backend route exactly
-  private readonly API_URL = '/api/url/shorten';
+  // Changed to base path to support multiple endpoints
+  private readonly BASE_URL = '/api/url';
 
   constructor(private http: HttpClient) {}
+
+  /**
+   * Fetches the 10 most recently created links for the user from MongoDB
+   */
+  getRecentLinks(): Observable<ShortenResponse[]> {
+    return this.http.get<ShortenResponse[]>(`${this.BASE_URL}/recent`, {
+      withCredentials: true
+    });
+  }
 
   /**
    * Universal method to shorten URLs with optional Alias and Expiration
@@ -53,8 +62,9 @@ export class UrlService {
       payload.expiresAt = options.expiresAt;
     }
 
-    return this.http.post<ShortenResponse>(this.API_URL, payload, {
-      withCredentials: true // Important for attaching session cookies/JWT
+    // Hits /api/url/shorten as before
+    return this.http.post<ShortenResponse>(`${this.BASE_URL}/shorten`, payload, {
+      withCredentials: true 
     });
   }
 }
