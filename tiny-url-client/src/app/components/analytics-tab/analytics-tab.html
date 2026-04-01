@@ -1,0 +1,62 @@
+<div class="dashboard-container">
+    <header class="dashboard-header">
+      <div>
+        <h1>Analytics Overview</h1>
+        <p class="subtitle">Real-time performance of your shortened links</p>
+      </div>
+      <button mat-flat-button color="primary" (click)="loadDashboardData()">
+        <mat-icon>refresh</mat-icon>
+        Refresh Stats
+      </button>
+    </header>
+  
+    @if (analytics.isLoading()) {
+      <div class="loading-shade">
+        <mat-spinner diameter="40"></mat-spinner>
+      </div>
+    }
+  
+    <div class="stats-grid">
+      <app-stat-card 
+        label="Total Clicks" 
+        [value]="summary()?.totalClicks || 0" 
+        icon="mouse" 
+        color="blue">
+      </app-stat-card>
+  
+      <app-stat-card 
+        label="Active Links" 
+        [value]="summary()?.activeLinks || 0" 
+        icon="bolt" 
+        color="green">
+      </app-stat-card>
+  
+      <app-stat-card 
+        label="Expired Links" 
+        [value]="summary()?.expiredLinks || 0" 
+        icon="link_off" 
+        color="orange">
+      </app-stat-card>
+    </div>
+  
+    <div class="dashboard-content">
+      <section class="leaderboard-section">
+        <div class="section-header">
+          <h3>Top Performing Links</h3>
+          <button mat-button color="primary">View All</button>
+        </div>
+        
+        <app-links-table [dataSource]="topLinks()"></app-links-table>
+      </section>
+  
+      <section class="chart-section">
+        <div class="section-header">
+          <h3>Click Trends (Last 7 Days)</h3>
+        </div>
+        <div class="chart-placeholder">
+          <mat-icon>insights</mat-icon>
+          <p>Chart coming soon - Integration with Chart.js</p>
+        </div>
+      </section>
+    </div>
+  </div>

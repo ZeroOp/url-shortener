@@ -1,0 +1,11 @@
+<mat-card [class]="'stat-card ' + color">
+    <mat-card-content>
+      <div class="stat-header">
+        <span class="stat-label">{{ label }}</span>
+        <mat-icon class="stat-icon">{{ icon }}</mat-icon>
+      </div>
+      <div class="stat-value">
+        {{ value | number }}
+      </div>
+    </mat-card-content>
+  </mat-card>

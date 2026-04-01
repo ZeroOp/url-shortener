@@ -1,0 +1,26 @@
+.stat-card {
+    border-radius: 12px;
+    border-bottom: 4px solid transparent;
+    transition: transform 0.2s;
+  
+    &:hover { transform: translateY(-4px); }
+  
+    &.blue { border-bottom-color: #3f51b5; .stat-icon { color: #3f51b5; } }
+    &.green { border-bottom-color: #4caf50; .stat-icon { color: #4caf50; } }
+    &.orange { border-bottom-color: #ff9800; .stat-icon { color: #ff9800; } }
+  }
+  
+  .stat-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #666;
+    font-size: 0.9rem;
+    margin-bottom: 8px;
+  }
+  
+  .stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #333;
+  }

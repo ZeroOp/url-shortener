@@ -1,1 +1,64 @@
-<p>dashboard works!</p>
+<div class="dashboard-shell">
+  <div class="shell-inner">
+    
+    <mat-tab-group 
+      (selectedIndexChange)="onTabChange($event)" 
+      color="primary"
+      animationDuration="0ms">
+      
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon class="tab-icon">insights</mat-icon>
+          <span>Analytics</span>
+        </ng-template>
+        
+        <div class="tab-content-wrapper">
+          @if (activeTab() === 'analytics') {
+            <app-analytics-tab></app-analytics-tab>
+          }
+        </div>
+      </mat-tab>
+
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon class="tab-icon">add_link</mat-icon>
+          <span>Create Link</span>
+        </ng-template>
+
+        <div class="tab-content-wrapper">
+          @if (activeTab() === 'create') {
+            <app-create-link-tab></app-create-link-tab>
+          }
+        </div>
+      </mat-tab>
+
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon class="tab-icon">list</mat-icon>
+          <span>All Links</span>
+        </ng-template>
+
+        <div class="tab-content-wrapper">
+          @if (activeTab() === 'links') {
+            <app-all-links-tab></app-all-links-tab>
+          }
+        </div>
+      </mat-tab>
+
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon class="tab-icon">settings</mat-icon>
+          <span>Settings</span>
+        </ng-template>
+        
+        <div class="tab-content-wrapper">
+          <div class="placeholder-view">
+             <h3>Account Settings</h3>
+             <p>Manage your profile and API keys here.</p>
+          </div>
+        </div>
+      </mat-tab>
+
+    </mat-tab-group>
+  </div>
+</div>

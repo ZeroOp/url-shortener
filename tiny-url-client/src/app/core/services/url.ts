@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
-// Matching your Backend Enum exactly
 export enum UrlStatus {
   Active = "Active",
   Expired = "Expired",
@@ -10,14 +9,14 @@ export enum UrlStatus {
 }
 
 export interface ShortenResponse {
-  id: string;          // Mapped from _id via transform()
+  id: string;
   longUrl: string;
-  shortUrl: string;    // Your unique shortCode
+  shortUrl: string;
   userId: string | null;
   status: UrlStatus;
   isAliased: boolean;
   clicks: number;
-  createdAt: string;   // Added via timestamps: true
+  createdAt: string;
   updatedAt: string;
   expiresAt?: string;
 }
@@ -26,17 +25,36 @@ export interface ShortenResponse {
   providedIn: 'root',
 })
 export class UrlService {
+  // Ensure this matches your backend route exactly
   private readonly API_URL = '/api/url/shorten';
 
   constructor(private http: HttpClient) {}
 
-  shortenUrl(longUrl: string): Observable<ShortenResponse> {
-    // Payload matches your router.post body validation
-    const payload = { 
-      longUrl, 
-      isAliased: false 
+  /**
+   * Universal method to shorten URLs with optional Alias and Expiration
+   */
+  shortenUrl(
+    longUrl: string, 
+    options?: { alias?: string; expiresAt?: Date | string }
+  ): Observable<ShortenResponse> {
+    
+    // Construct the payload dynamically
+    const payload: any = { 
+      longUrl,
+      // If an alias exists, isAliased is true, otherwise false
+      isAliased: !!options?.alias 
     };
 
-    return this.http.post<ShortenResponse>(this.API_URL, payload);
+    if (options?.alias) {
+      payload.alias = options.alias;
+    }
+
+    if (options?.expiresAt) {
+      payload.expiresAt = options.expiresAt;
+    }
+
+    return this.http.post<ShortenResponse>(this.API_URL, payload, {
+      withCredentials: true // Important for attaching session cookies/JWT
+    });
   }
 }

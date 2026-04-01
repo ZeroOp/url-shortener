@@ -1,0 +1,93 @@
+.dashboard-shell {
+  background-color: #f8fafc; // Softer gray background
+  min-height: 100vh;
+}
+
+.shell-inner {
+  background-color: white;
+  min-height: 100vh;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1); // Subtle separation
+}
+
+// Global Tab Group Overrides
+::ng-deep .mat-mdc-tab-group {
+  --mdc-tab-indicator-active-indicator-color: #3b82f6; // Modern Blue
+  --mdc-tab-indicator-active-indicator-height: 3px;
+}
+
+// Styling the Tab Header Container
+::ng-deep .mat-mdc-tab-header {
+  border-bottom: 1px solid #e2e8f0;
+  padding: 0 32px; // More breathing room on sides
+  background: white;
+}
+
+// Styling Individual Tab Labels
+::ng-container .mat-mdc-tab {
+  height: 64px; // Taller, more substantial tabs
+  opacity: 1;
+}
+
+::ng-deep .mdc-tab__text-label {
+  color: #64748b !important; // Muted text for inactive
+  font-weight: 500;
+  font-size: 0.95rem;
+  transition: color 0.2s ease;
+  display: flex;
+  align-items: center;
+}
+
+// Active Tab Styling
+::ng-deep .mat-mdc-tab.mdc-tab--active .mdc-tab__text-label {
+  color: #1e293b !important; // Darker text for active
+  font-weight: 600;
+}
+
+// Hover State
+::ng-deep .mat-mdc-tab:hover .mdc-tab__text-label {
+  color: #334155 !important;
+}
+
+.tab-icon {
+  margin-right: 10px;
+  font-size: 22px;
+  height: 22px;
+  width: 22px;
+  // Make icons slightly lighter than text
+  opacity: 0.7; 
+
+  .mdc-tab--active & {
+    opacity: 1;
+    color: #3b82f6; // Icon takes primary color when active
+  }
+}
+
+.tab-content-wrapper {
+  padding: 24px;
+  background-color: #f8fafc;
+  min-height: calc(100vh - 65px);
+}
+
+// Clean up the focus rings (optional, for aesthetics)
+::ng-deep .mat-mdc-tab .mdc-tab__ripple {
+  display: none; 
+}
+
+.placeholder-view {
+  padding: 80px 40px;
+  text-align: center;
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  margin-top: 20px;
+
+  h3 {
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 8px;
+  }
+  
+  p {
+    color: #64748b;
+  }
+}
