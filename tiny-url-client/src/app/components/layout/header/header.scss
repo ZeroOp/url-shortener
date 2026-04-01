@@ -1,0 +1,31 @@
+mat-toolbar {
+    background-color: #1f2937 !important;
+    color: white !important;
+  }
+  
+  .spacer {
+    flex: 1 1 auto;
+  }
+  
+  .navigation-links {
+    display: flex;
+    gap: 8px;
+  }
+  
+  // Target the buttons inside the navbar
+  .navigation-links button {
+    background-color: transparent !important; // "None" color
+    color: #d1d5db !important; // Light gray text to match the dark theme
+    transition: background-color 0.3s ease; // Smooth fade
+  
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.1) !important; // Slight white opacity
+      color: white !important;
+    }
+  }
+  
+  .logo {
+    cursor: pointer;
+    font-weight: 600;
+    color: white;
+  }

@@ -1,0 +1,61 @@
+<!-- <div class="home-container">
+    <div class="stats-section">
+      <h1>Global Connectivity</h1>
+      <p>Real-time insights into our distributed URL shortening engine.</p>
+      
+      <div class="stats-grid">
+        <div class="stat-card">
+          <span class="stat-value">1.2M+</span>
+          <span class="stat-label">Total Redirects</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value">45ms</span>
+          <span class="stat-label">Avg. Latency</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value">99.9%</span>
+          <span class="stat-label">Uptime</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value">24/7</span>
+          <span class="stat-label">Monitoring</span>
+        </div>
+      </div>
+    </div>
+  
+    <div class="action-section">
+      <mat-card class="shortener-card">
+        <mat-card-header>
+          <mat-card-title>Shorten URL</mat-card-title>
+        </mat-card-header>
+        
+        <mat-card-content>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Paste your long link</mat-label>
+            <input matInput #urlInput placeholder="https://example.com/very-long-link">
+            <mat-icon matPrefix>link</mat-icon>
+          </mat-form-field>
+  
+          <button mat-flat-button color="primary" class="full-width shorten-btn" (click)="shorten(urlInput.value)">
+            Shorten Now
+          </button>
+  
+          @if (shortenedUrl) {
+            <div class="result-container" (click)="copyToClipboard()">
+              <div class="result-label">Your Short Link:</div>
+              <div class="result-link">
+                <span>{{ shortenedUrl }}</span>
+                <mat-icon>content_copy</mat-icon>
+              </div>
+              <div class="copy-hint">Click to copy to clipboard</div>
+            </div>
+          }
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div> -->
+
+  <div class="home-container">
+    <app-stats></app-stats>
+    <app-shortener-card></app-shortener-card>
+  </div>

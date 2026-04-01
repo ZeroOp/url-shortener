@@ -1,0 +1,138 @@
+.home-container {
+    display: flex;
+    max-width: 1200px;
+    margin: 0 auto;
+    
+    // Fills the screen vertically
+    min-height: calc(100vh - 64px); 
+    padding: 60px 20px;
+    gap: 60px;
+    
+    // Centers content vertically in the available space
+    align-items: center; 
+  }
+  
+  .stats-section {
+    flex: 0 0 60%;
+    
+    h1 { 
+      font-size: 3.5rem; 
+      font-weight: 800; 
+      line-height: 1.1;
+      margin-bottom: 20px; 
+      color: #1f2937; 
+    }
+    
+    p { 
+      font-size: 1.4rem; 
+      color: #4b5563; 
+      margin-bottom: 60px; 
+      max-width: 500px;
+    }
+  }
+  
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+  }
+  
+  .stat-card {
+    background: white;
+    padding: 30px;
+    border-radius: 16px;
+    border: 1px solid #e5e7eb;
+    transition: all 0.3s ease;
+  
+    &:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 15px 30px rgba(0,0,0,0.08);
+      border-color: #3b82f6;
+    }
+  
+    .stat-value { 
+      display: block;
+      font-size: 2.2rem; 
+      font-weight: 700;
+      color: #2563eb; 
+      margin-bottom: 4px;
+    }
+  
+    .stat-label {
+      color: #6b7280;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+  }
+  
+  .action-section {
+    flex: 0 0 40%;
+  }
+  
+  .shortener-card {
+    padding: 40px; 
+    border-radius: 24px;
+    background: white;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.08) !important;
+    border: 1px solid #e5e7eb;
+  }
+  
+  .full-width {
+    width: 100%;
+    margin-bottom: 20px;
+  }
+  
+  .shorten-btn {
+    width: 100%;
+    height: 56px;
+    font-weight: 600;
+    font-size: 1.1rem;
+    border-radius: 12px;
+  }
+  
+  /* --- THE GREEN SUCCESS BOX --- */
+  .result-container {
+    margin-top: 25px;
+    padding: 16px;
+    background-color: #f0fdf4 !important; // Success Light Green
+    border: 1px dashed #22c55e !important; // Success Border
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  
+    &:hover {
+      transform: translateY(-2px);
+      background-color: #dcfce7 !important;
+      box-shadow: 0 4px 12px rgba(34, 197, 94, 0.1);
+    }
+  
+    .result-label {
+      font-size: 0.75rem;
+      color: #166534;
+      font-weight: 700;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+  
+    .result-link {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: 'Roboto Mono', monospace;
+      font-size: 1.05rem;
+      color: #15803d;
+  
+      mat-icon {
+        font-size: 1.2rem;
+        color: #16a34a;
+      }
+    }
+  
+    .copy-hint {
+      font-size: 0.7rem;
+      color: #16a34a;
+      text-align: right;
+      margin-top: 4px;
+    }
+  }

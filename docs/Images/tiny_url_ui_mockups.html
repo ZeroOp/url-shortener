@@ -1,0 +1,148 @@
+<!-- COMMON HEADER (reuse in all pages) -->
+<style>
+  body { margin:0; font-family: Arial; background:#f4f6f8; }
+  .navbar {
+    display:flex; justify-content:space-between; align-items:center;
+    padding:15px 40px; background:#1f2937; color:white;
+  }
+  .nav-links a {
+    margin-left:20px; color:white; text-decoration:none;
+  }
+  .container { padding:40px; }
+  .card {
+    background:white; padding:30px; border-radius:12px;
+    box-shadow:0 4px 10px rgba(0,0,0,0.1);
+    max-width:500px; margin:80px auto; text-align:center;
+  }
+  input { width:100%; padding:12px; margin:10px 0; border-radius:8px; border:1px solid #ccc; }
+  button { padding:12px 20px; border:none; background:#4CAF50; color:white; border-radius:8px; cursor:pointer; }
+  table { width:100%; border-collapse: collapse; background:white; }
+  th, td { padding:12px; border-bottom:1px solid #ddd; text-align:left; }
+  .expired { color:red; font-weight:bold; }
+  .actions button { background:#ef4444; }
+</style>
+
+
+<!-- HOME PAGE -->
+<!DOCTYPE html>
+<html>
+<head><title>TinyURL - Home</title></head>
+<body>
+  <div class="navbar">
+    <div><b>TinyURL</b></div>
+    <div class="nav-links">
+      <a href="/login">Login</a>
+      <a href="/signup">Signup</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Shorten your long URL</h2>
+    <input placeholder="Enter long URL" />
+    <button>Shorten</button>
+  </div>
+</body>
+</html>
+
+
+<!-- LOGIN PAGE -->
+<!DOCTYPE html>
+<html>
+<head><title>Login</title></head>
+<body>
+  <div class="navbar">
+    <div><b>TinyURL</b></div>
+    <div class="nav-links">
+      <a href="/">Home</a>
+      <a href="/signup">Signup</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Login</h2>
+    <input placeholder="Email" />
+    <input type="password" placeholder="Password" />
+    <button>Login</button>
+  </div>
+</body>
+</html>
+
+
+<!-- SIGNUP PAGE -->
+<!DOCTYPE html>
+<html>
+<head><title>Signup</title></head>
+<body>
+  <div class="navbar">
+    <div><b>TinyURL</b></div>
+    <div class="nav-links">
+      <a href="/">Home</a>
+      <a href="/login">Login</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Create Account</h2>
+    <input placeholder="Email" />
+    <input type="password" placeholder="Password" />
+    <button>Signup</button>
+  </div>
+</body>
+</html>
+
+
+<!-- DASHBOARD PAGE -->
+<!DOCTYPE html>
+<html>
+<head><title>Dashboard</title></head>
+<body>
+  <div class="navbar">
+    <div><b>TinyURL</b></div>
+    <div class="nav-links">
+      <a href="/">Home</a>
+      <a href="/logout">Logout</a>
+    </div>
+  </div>
+
+  <div class="container">
+    <h2>Your Links</h2>
+    <table>
+      <tr>
+        <th>Original URL</th>
+        <th>Short URL</th>
+        <th>Clicks</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+      <tr onclick="openModal()">
+        <td>https://example.com/very-long-url</td>
+        <td>tiny.ly/abc</td>
+        <td>120</td>
+        <td>Active</td>
+        <td class="actions"><button>Delete</button></td>
+      </tr>
+      <tr onclick="openModal()">
+        <td>https://google.com</td>
+        <td>tiny.ly/xyz</td>
+        <td>45</td>
+        <td class="expired">Expired</td>
+        <td class="actions"><button>Delete</button></td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- MODAL -->
+  <div id="modal" style="display:none; position:fixed; top:20%; left:35%; width:300px; background:white; padding:20px; border-radius:10px; box-shadow:0 4px 10px rgba(0,0,0,0.2);">
+    <h3>Link Analytics</h3>
+    <p>Total Clicks: 120</p>
+    <p>Created At: 2026-01-01</p>
+    <p>Last Accessed: 2026-03-30</p>
+    <button onclick="closeModal()">Close</button>
+  </div>
+
+  <script>
+    function openModal(){ document.getElementById('modal').style.display='block'; }
+    function closeModal(){ document.getElementById('modal').style.display='none'; }
+  </script>
+</body>
+</html>

@@ -1,0 +1,19 @@
+/* src/styles.scss */
+html, body {
+  height: 100%;
+  margin: 0;
+  
+  // The new light-gray background you requested
+  background-color: #f4f6f8; 
+  
+  // Set default text to a dark "Slate" for high readability
+  color: #1f2937; 
+  
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+
+/* Ensure Angular Material form fields look crisp on this light gray */
+.mat-mdc-form-field {
+  background-color: white;
+  border-radius: 4px;
+}
