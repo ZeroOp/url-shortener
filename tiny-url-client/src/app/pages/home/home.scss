@@ -1,26 +1,119 @@
 .home-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 60px 20px;
+
+  // --- HERO SECTION (Stats + Shortener) ---
+  .hero-grid {
     display: flex;
-    max-width: 1200px;
-    margin: 0 auto;
-    align-items: flex-start;
-    min-height: calc(100vh - 64px); 
-    margin-top: 0;
-    padding: 0 0; 
+    gap: 40px;
+    margin-bottom: 10px; // Increased gap for better section breathing
     
+    // FIX: This aligns the Shortener card vertically to the center of the Stats card
     align-items: center; 
-    
-    justify-content: space-between; 
+    justify-content: center;
+
+    .stats-wrapper { 
+      flex: 0 0 50%; 
+    }
+
+    .shortener-wrapper { 
+      flex: 0 0 40%;
+      display: flex;
+      flex-direction: column;
+      
+      // Ensure the card inside doesn't have weird top margins
+      app-shortener-card {
+        width: 100%;
+      }
+    }
   }
-  
-  app-stats {
-    flex: 0 0 50%;
-    display: block; 
+
+  // --- FEATURES/INFO SECTION ---
+  .features-section {
+    text-align: center;
+    border-top: 1px solid #f3f4f6; // Subtle separator
+    padding-top: 80px;
+
+    .section-intro {
+      margin-bottom: 56px;
+      
+      h2 { 
+        font-size: 2.25rem; 
+        font-weight: 800; 
+        color: #111827; 
+        letter-spacing: -0.025em;
+        margin-bottom: 12px;
+      }
+      
+      p { 
+        color: #6b7280; 
+        font-size: 1.15rem; 
+        max-width: 600px;
+        margin: 0 auto;
+      }
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 32px;
+
+      .feature-card {
+        padding: 40px 32px;
+        border-radius: 24px;
+        background: #ffffff;
+        border: 1px solid #f3f4f6;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        text-align: left;
+
+        &:hover { 
+          transform: translateY(-8px); 
+          box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05);
+          border-color: #e5e7eb;
+        }
+
+        mat-icon { 
+          font-size: 32px; 
+          width: 32px; 
+          height: 32px; 
+          margin-bottom: 20px;
+          color: #2563eb; // Matches your primary brand blue
+        }
+
+        h3 { 
+          font-size: 1.35rem; 
+          font-weight: 700; 
+          margin-bottom: 14px; 
+          color: #1f2937; 
+        }
+
+        p { 
+          color: #4b5563; 
+          line-height: 1.7; 
+          font-size: 1rem; 
+        }
+      }
+    }
   }
-  
-  app-shortener-card {
-    flex: 0 0 40%;
-    display: block;
-    
-    height: 80%; 
+}
+
+// --- RESPONSIVENESS ---
+@media (max-width: 1024px) {
+  .home-container {
+    .hero-grid {
+      flex-direction: column;
+      align-items: stretch; // Stack them full-width on smaller screens
+      
+      .stats-wrapper, .shortener-wrapper {
+        flex: 1 0 100%;
+      }
+    }
+
+    .features-grid {
+      grid-template-columns: 1fr; // Single column for mobile features
+      gap: 20px;
+    }
   }
-  
+}

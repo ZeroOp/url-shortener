@@ -1,0 +1,14 @@
+{
+  "/api": {
+    "target": "https://link.zeroop.dev",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  },
+  "/r": {
+    "target": "https://link.zeroop.dev",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  }
+}

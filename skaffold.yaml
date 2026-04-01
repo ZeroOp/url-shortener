@@ -67,7 +67,7 @@ manifests:
     - infra/k8s/event-bus/*
     - infra/k8s/auth-depl.yaml
     - infra/k8s/url-depl.yaml
-    - infra/k8s/client-depl.yaml
+    # - infra/k8s/client-depl.yaml
     - infra/k8s/counter-depl.yaml
     - infra/k8s/analytics-depl.yaml
     - infra/k8s/expiration-depl.yaml
