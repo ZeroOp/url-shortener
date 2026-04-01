@@ -7,5 +7,6 @@ export interface UrlClickedEvent {
         timestamp: string;
         userAgent?: string;
         ip?: string;
+        processingTimeMs: number;
     };
 }
