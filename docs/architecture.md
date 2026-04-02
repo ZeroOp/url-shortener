@@ -1,4 +1,5 @@
 # 🏗️ System Architecture
+![System Architecture](./Images/architecture.png)
 
 ## 📌 Overview
 
