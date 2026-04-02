@@ -1,49 +1,225 @@
 # 📊 Analytics Service
 
-The Analytics Service is a high-throughput, event-driven microservice responsible for tracking, processing, and aggregating every interaction with a short URL. It leverages **ClickHouse** to provide real-time insights with sub-second query latency.
+## 📌 Overview
+
+The **Analytics Service** is responsible for tracking and analyzing URL activity in real time.
+
+It follows a **fully event-driven architecture** and uses **ClickHouse (OLAP database)** for high-speed analytics.
 
 ---
 
-## 🛠️ Core Responsibilities
+## 🧩 Responsibilities
 
-- **Event Ingestion:** Listens to the `url:clicked`, `url:expired` and `url:deleted` subjects on the **NATS Streaming** bus.
-- **Metadata Synchronization:** Maintains a mirrored state of URL metadata (Short URL, Long URL, UserID) within ClickHouse to allow for "stitched" API responses.
-- **Data Transformation:** Normalizes high-resolution browser timestamps into ClickHouse-compatible formats (removing 'T' and 'Z' markers).
-- **Real-Time Aggregation:** Orchestrates the flow of raw click events into pre-aggregated summary tables via Materialized Views.
-
----
-
-## 🗄️ ClickHouse Architecture (High Availability)
-
-The storage layer is designed as a distributed cluster to ensure zero data loss and horizontal scalability.
-
-- **Cluster Configuration:** `url_analytics_cluster`
-- **Topology:** 2 Shards × 2 Replicas = **4 Dedicated Nodes** (`clickhouse-0` through `clickhouse-3`).
-- **Engine:** Uses the `ReplicatedMergeTree` family with **Zookeeper** for coordination.
+* Track URL clicks
+* Store URL metadata
+* Provide analytics dashboards
+* Aggregate data efficiently
 
 ---
 
-## 🔄 The Data Pipeline (The "Bridge")
+## ⚡ Architecture Highlights
 
-We implement an **OLAP (Online Analytical Processing)** pattern to separate raw logs from display-ready stats.
-
-1. **Raw Table (`link_clicks`):** A distributed table that stores every individual click (IP, User Agent, Timestamp).
-2. **The Worker (`link_clicks_mv`):** A Materialized View that acts as an internal trigger. It "watches" the raw table and automatically calculates daily totals.
-3. **Summary Table (`daily_stats`):** A `SummingMergeTree` table that stores the final counts. The frontend queries this table for the Management Dashboard, ensuring the UI stays fast even with millions of clicks.
-
----
-
-## 🛡️ Error Handling & Consistency
-
-- **Strict Typing:** The service automatically handles ISO-8601 string conversions to prevent ClickHouse insertion failures (`CANNOT_PARSE_INPUT_ASSERTION_FAILED`).
-- **Idempotency:** Uses a `version` column (based on `Date.now()`) in the `url_metadata` table. Combined with `ReplacingMergeTree`, this ensures the latest state (like a 'deleted' status) always wins during background merges.
-- **Graceful Degradation:** If ClickHouse is temporarily unreachable, the service stays alive and allows NATS to retry message delivery, ensuring no click data is ever dropped.
+* Event-driven (via NATS)
+* High-throughput ingestion
+* Real-time aggregation using **Materialized Views**
+* Optimized for read-heavy analytics queries
 
 ---
 
-## 📡 API Endpoints
+## 📡 Event Consumption (NATS)
 
-| Endpoint | Method | Description |
-| :--- | :--- | :--- |
-| `/api/analytics/counts` | `GET` | Returns aggregated click counts for all links owned by the user. |
-| `/api/analytics/stats/:code` | `GET` | Returns detailed time-series data for a specific short link. |
+### Events Handled
+
+* **`url-clicked`**
+
+  * Stores click events (shortUrl, IP, userAgent, timestamp)
+
+* **`url-created`**
+
+  * Stores metadata (shortUrl, longUrl, userId)
+
+* **`url-deleted`**
+
+  * Marks URL as `deleted` (soft delete)
+
+* **`url-expired`**
+
+  * Marks URL as `expired`
+
+---
+
+### Reliability Strategy
+
+* Data is written to ClickHouse **before ACK**
+* If DB write fails:
+
+  * Message is **not acknowledged**
+  * NATS automatically retries
+
+---
+
+## 🛢️ ClickHouse Cluster
+
+* **4 Nodes**
+
+  * 2 Shards
+  * 2 Replicas
+
+### Why This Setup?
+
+* Sharding → distributes write load
+* Replication → ensures fault tolerance
+
+---
+
+### Coordination
+
+* Uses **ClickHouse Keeper** (ZooKeeper alternative)
+* Handles:
+
+  * Replication
+  * Cluster coordination
+
+---
+
+## 📦 Data Modeling
+
+### 1. Raw Events Table
+
+* Stores all click events (`link_clicks`)
+* High ingestion rate
+
+---
+
+### 2. Metadata Table
+
+* Stores URL info (`url_metadata`)
+* Uses **ReplacingMergeTree**
+
+#### Why?
+
+* Enables **upserts using versioning**
+* Latest record wins (active / deleted / expired)
+
+---
+
+### 3. Aggregation Table
+
+* Stores daily stats (`daily_stats`)
+* Precomputed using Materialized View
+
+---
+
+## 🔄 Materialized View (Core Optimization)
+
+```sql
+CREATE MATERIALIZED VIEW analytics.link_clicks_mv 
+TO analytics.daily_stats_local AS
+SELECT 
+    shortUrl, 
+    toDate(timestamp) AS day, 
+    count() AS total_clicks 
+FROM analytics.link_clicks_local 
+GROUP BY shortUrl, day;
+```
+
+### Why This Matters
+
+* Automatically aggregates data on insert
+* No need for expensive runtime queries
+* Enables fast dashboard responses
+
+---
+
+## 📊 Query Capabilities
+
+### URL-Level Analytics
+
+* Daily clicks
+* Time-series (1 min / 10 min / hourly)
+
+### User-Level Analytics
+
+* Total links
+* Active vs expired links
+* Total clicks across all URLs
+
+### Advanced Insights
+
+* Device breakdown (Mobile / Desktop)
+* Geo distribution (country)
+* Top performing links
+
+---
+
+## ⏱️ Time-Series Optimization
+
+Supports multiple resolutions:
+
+* **1 minute** → last 1–2 hours
+* **10 minutes** → last 12 hours
+* **1 hour** → last 7 days
+
+---
+
+## 🌐 API Routes
+
+All routes prefixed with: `/api/analytics`
+
+| Method | Endpoint                | Description                |
+| ------ | ----------------------- | -------------------------- |
+| GET    | `/summary`              | User analytics summary     |
+| GET    | `/charts/clicks`        | Click trends               |
+| GET    | `/top-links`            | Top performing URLs        |
+| GET    | `/counts`               | Click counts for all links |
+| GET    | `/timeseries/:shortUrl` | Time-series analytics      |
+
+---
+
+## 🔄 Data Consistency Strategy
+
+* Writes are append-only (ClickHouse)
+* Updates handled via:
+
+  * **Version-based upserts**
+* Deletes are **soft deletes** (status change)
+
+---
+
+## ⚖️ Design Decisions
+
+### Why ClickHouse?
+
+* Built for OLAP workloads
+* Handles massive event ingestion
+* Extremely fast aggregations
+
+---
+
+### Why Materialized Views?
+
+* Precompute aggregates
+* Reduce query latency
+* Improve dashboard performance
+
+---
+
+### Why Event-Driven?
+
+* Decouples analytics from core services
+* No impact on URL redirection performance
+* Scales independently
+
+---
+
+## 📌 Summary
+
+* 📊 Real-time analytics using ClickHouse
+* ⚡ High ingestion via event streaming (NATS)
+* 🔄 Automatic aggregation with Materialized Views
+* 📈 Supports advanced analytics & dashboards
+* 🚀 Scales independently from core services
+
+---
+
+> This service is optimized for high-volume analytics with minimal impact on the core URL system.

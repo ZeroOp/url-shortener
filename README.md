@@ -17,13 +17,13 @@ Click on the links below to dive into the technical details of each component:
 
 | Service / Module | Description | Link |
 | :--- | :--- | :--- |
-| **Architecture** | High-level design, data flow, and trade-offs. | [Read Docs](./architecture.md) |
-| **Auth Service** | Identity management and JWT-based security. | [Read Docs](./auth-service.md) |
-| **URL Service** | The core redirection engine and link management. | [Read Docs](./url-service.md) |
-| **Counter Service** | Distributed ID generation for short codes. | [Read Docs](./counter-service.md) |
-| **Analytics Service** | ClickHouse-powered real-time tracking and MVs. | [Read Docs](./analytics-service.md) |
-| **Expiration Service** | TTL management and automated link cleanup. | [Read Docs](./expiration.md) |
-| **Database Layer** | MongoDB & ClickHouse cluster configurations. | [Read Docs](./database.md) |
+| **Architecture** | High-level design, data flow, and trade-offs. | [Read Docs](./docs/architecture.md) |
+| **Auth Service** | Identity management and JWT-based security. | [Read Docs](./docs/auth-service.md) |
+| **URL Service** | The core redirection engine and link management. | [Read Docs](./docs/url-service.md) |
+| **Counter Service** | Distributed ID generation for short codes. | [Read Docs](./docs/counter-service.md) |
+| **Analytics Service** | ClickHouse-powered real-time tracking and MVs. | [Read Docs](./docs/analytics-service.md) |
+| **Expiration Service** | TTL management and automated link cleanup. | [Read Docs](./docs/expiration.md) |
+| **Database Layer** | MongoDB & ClickHouse cluster configurations. | [Read Docs](./docs/database.md) |
 
 ---
 ## 🛠️ Tech Stack & Prerequisites
