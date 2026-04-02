@@ -26,24 +26,22 @@ Click on the links below to dive into the technical details of each component:
 | **Database Layer** | MongoDB & ClickHouse cluster configurations. | [Read Docs](./database.md) |
 
 ---
+## 🛠️ Tech Stack & Prerequisites
 
-## 🚀 Quick Start (Local Development)
-
-### 🛠️ Tech Stack & Prerequisites
-
-#### 1. Local Development Tools (Install these first)
+### 1. Local Development Tools (Install these first)
 * **Docker & Kubernetes** (minikube/kind) - Container orchestration.
-* **Helm** - Managing Kubernetes charts.
 * **Node.js** - Runtime for Backend services.
 * **Angular** - Frontend Framework.
 
-#### 2. Infrastructure & Middleware (Running in Cluster)
+### 2. Infrastructure & Middleware (Running in Cluster)
 * **NATS Streaming Server** - High-performance event bus for asynchronous communication.
 * **Redis Cluster** - Distributed caching and ID generation (Counter Service).
 * **BullJS** - Distributed queue management for link expiration logic.
 * **MongoDB Cluster** - Document storage for Users (Auth) and URL Mappings.
 * **ClickHouse** - OLAP database for high-speed analytics and click-stream processing.
 
+---
+## 🚀 Quick Start (Local Development)
 
 1. **Setup Cluster:**
    ```bash
@@ -77,9 +75,3 @@ Click on the links below to dive into the technical details of each component:
    * **URL:** [https://link.zeroop.dev/](https://link.zeroop.dev/)
    * **SSL/Cert Note:** Since this uses self-signed certs, if you see a "Connection is not private" warning in Chrome, simply type `thisisunsafe` anywhere on the browser window to bypass and access the dashboard.
 ---
-
-## 🛠️ Technology Stack
-- **Languages:** TypeScript (Node.js), Angular (Frontend).
-- **Communication:** NATS Streaming (Event Bus), gRPC/REST.
-- **Databases:** MongoDB (Metadata), Redis (Cache), ClickHouse (Analytics).
-- **Orchestration:** Kubernetes, Docker, Ingress-Nginx.
