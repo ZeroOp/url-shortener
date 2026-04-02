@@ -28,10 +28,13 @@ Click on the links below to dive into the technical details of each component:
 ---
 
 ## 🚀 Quick Start (Local Development)
-1. **Prerequisites:** Docker, Kubernetes (minikube/kind), and Helm.
-2. **Setup Cluster:** `kubectl apply -f ./k8s`
-3. **Initialize Databases:** See the [Database Docs](./database.md) for ClickHouse migrations.
 
+1. **Prerequisites:** Docker, Kubernetes (minikube/kind), and Helm.
+
+2. **Setup Cluster:**
+   ```bash
+   kubectl apply -f ./k8s
+    ```
 ---
 
 ## 🛠️ Technology Stack
