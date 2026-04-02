@@ -35,6 +35,12 @@ Click on the links below to dive into the technical details of each component:
    ```bash
    kubectl apply -f ./k8s
     ```
+3. **Initialize Auth MongoDB Cluster:**
+    ```bash
+        kubectl exec -it mongo-0 -- mongod --eval 'rs.initiate({ _id: "rs0", members: [{ _id: 0, host: "mongo-0.mongo:27017" }, { _id: 1, host: "mongo-1.mongo:27017" }, { _id: 2, host: "mongo-2.mongo:27017" }]})'
+    ```
+4. **Initialize URL MongoDB Cluster:**
+    ```kubectl exec -it url-mongo-0 -- mongod --eval 'rs.initiate({ _id: "rs0", members: [{ _id: 0, host: "url-mongo-0.url-mongo-srv:27017" }, { _id: 1, host: "url-mongo-1.url-mongo-srv:27017" }, { _id: 2, host: "url-mongo-2.url-mongo-srv:27017" }]})'```
 ---
 
 ## 🛠️ Technology Stack
