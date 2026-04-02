@@ -40,7 +40,28 @@ Click on the links below to dive into the technical details of each component:
         kubectl exec -it mongo-0 -- mongod --eval 'rs.initiate({ _id: "rs0", members: [{ _id: 0, host: "mongo-0.mongo:27017" }, { _id: 1, host: "mongo-1.mongo:27017" }, { _id: 2, host: "mongo-2.mongo:27017" }]})'
     ```
 4. **Initialize URL MongoDB Cluster:**
-    ```kubectl exec -it url-mongo-0 -- mongod --eval 'rs.initiate({ _id: "rs0", members: [{ _id: 0, host: "url-mongo-0.url-mongo-srv:27017" }, { _id: 1, host: "url-mongo-1.url-mongo-srv:27017" }, { _id: 2, host: "url-mongo-2.url-mongo-srv:27017" }]})'```
+    ```bash
+    kubectl exec -it url-mongo-0 -- mongod --eval 'rs.initiate({ _id: "rs0", members: [{ _id: 0, host: "url-mongo-0.url-mongo-srv:27017" }, { _id: 1, host: "url-mongo-1.url-mongo-srv:27017" }, { _id: 2, host: "url-mongo-2.url-mongo-srv:27017" }]})'```
+5. **Initialize Redis Cluster:**
+   Wait for all 8 pods to be `Running`, then execute the cluster creation command. This automatically assigns 4 Masters and 4 Replicas:
+   ```bash
+   kubectl exec -it redis-cluster-0 -- redis-cli --cluster create \
+   $(kubectl get pods -l app=redis-cluster -o jsonpath='{range.items[*]}{.status.podIP}:6379 {end}') \
+   --cluster-replicas 1 --cluster-yes
+   ```
+   ### 💡 Why Redis Initialization is a "Must":
+    1. **Slot Assignment:** Redis Cluster divides data into 16,384 hash slots. Without the initialization command, 0 slots are assigned, and every `SET` or `GET` request from the URL Service will fail with a `CLUSTERDOWN` error.
+    2. **High Availability:** Using `--cluster-replicas 1` ensures each of the 4 Masters has 1 Replica. If a master node (e.g., `redis-cluster-0`) fails, its replica automatically takes over.
+    3. **Internal Gossip:** The initialization starts the "Gossip Protocol" on port `16379`, allowing nodes to monitor each other's health and state.
+
+    > **Note for Local Setup:** Since the YAML uses `emptyDir: {}`, the cluster configuration in `/data` is wiped if you restart Docker Desktop or Minikube. You will need to re-run the initialization command in those cases.
+
+5. **Initialize Databases:** See the [Database Docs](./database.md) for ClickHouse migrations.
+
+6. **Access Application:**
+   * **Update Hosts File:** Map `link.zeroop.dev` to `127.0.0.1` in your local hosts file (e.g., `/etc/hosts` or `C:\Windows\System32\drivers\etc\hosts`).
+   * **URL:** [https://link.zeroop.dev/](https://link.zeroop.dev/)
+   * **SSL/Cert Note:** Since this uses self-signed certs, if you see a "Connection is not private" warning in Chrome, simply type `thisisunsafe` anywhere on the browser window to bypass and access the dashboard.
 ---
 
 ## 🛠️ Technology Stack
