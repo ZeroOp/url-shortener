@@ -29,20 +29,34 @@ Click on the links below to dive into the technical details of each component:
 
 ## 🚀 Quick Start (Local Development)
 
-1. **Prerequisites:** Docker, Kubernetes (minikube/kind), and Helm.
+### 🛠️ Tech Stack & Prerequisites
 
-2. **Setup Cluster:**
+#### 1. Local Development Tools (Install these first)
+* **Docker & Kubernetes** (minikube/kind) - Container orchestration.
+* **Helm** - Managing Kubernetes charts.
+* **Node.js** - Runtime for Backend services.
+* **Angular** - Frontend Framework.
+
+#### 2. Infrastructure & Middleware (Running in Cluster)
+* **NATS Streaming Server** - High-performance event bus for asynchronous communication.
+* **Redis Cluster** - Distributed caching and ID generation (Counter Service).
+* **BullJS** - Distributed queue management for link expiration logic.
+* **MongoDB Cluster** - Document storage for Users (Auth) and URL Mappings.
+* **ClickHouse** - OLAP database for high-speed analytics and click-stream processing.
+
+
+1. **Setup Cluster:**
    ```bash
    kubectl apply -f ./k8s
     ```
-3. **Initialize Auth MongoDB Cluster:**
+2. **Initialize Auth MongoDB Cluster:**
     ```bash
         kubectl exec -it mongo-0 -- mongod --eval 'rs.initiate({ _id: "rs0", members: [{ _id: 0, host: "mongo-0.mongo:27017" }, { _id: 1, host: "mongo-1.mongo:27017" }, { _id: 2, host: "mongo-2.mongo:27017" }]})'
     ```
-4. **Initialize URL MongoDB Cluster:**
+3. **Initialize URL MongoDB Cluster:**
     ```bash
     kubectl exec -it url-mongo-0 -- mongod --eval 'rs.initiate({ _id: "rs0", members: [{ _id: 0, host: "url-mongo-0.url-mongo-srv:27017" }, { _id: 1, host: "url-mongo-1.url-mongo-srv:27017" }, { _id: 2, host: "url-mongo-2.url-mongo-srv:27017" }]})'```
-5. **Initialize Redis Cluster:**
+4. **Initialize Redis Cluster:**
    Wait for all 8 pods to be `Running`, then execute the cluster creation command. This automatically assigns 4 Masters and 4 Replicas:
    ```bash
    kubectl exec -it redis-cluster-0 -- redis-cli --cluster create \
