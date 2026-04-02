@@ -1,11 +1,20 @@
 <header>
-    <mat-toolbar color="primary">
-      <span class="logo" routerLink="/">Tiny URL</span>
-      <span class="spacer"></span>
-      <nav class="navigation-links"> 
-        <button mat-flat-button  routerLink="/">Home</button>
-         <button mat-flat-button  routerLink="/dashboard">Dashboard</button>
-         <button mat-flat-button  routerLink="/signin">Sign In</button>
-      </nav>
-    </mat-toolbar>
+  <mat-toolbar color="primary">
+    <span class="logo" routerLink="/">Tiny URL</span>
+    <span class="spacer"></span>
+    <nav class="navigation-links"> 
+      <button mat-flat-button routerLink="/">Home</button>
+      
+      <button mat-flat-button routerLink="/dashboard">Dashboard</button>
+
+      @if (!authService.isAuthenticated()) {
+        <button mat-flat-button routerLink="/signin">Sign In</button>
+        <button mat-flat-button routerLink="/signup">Sign Up</button>
+      }
+
+      @if (authService.isAuthenticated()) {
+        <button mat-flat-button (click)="onLogout()">Logout</button>
+      }
+    </nav>
+  </mat-toolbar>
 </header>
