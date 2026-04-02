@@ -55,13 +55,15 @@ export class UrlService {
     };
 
     if (options?.alias) {
-      payload.alias = options.alias;
+      payload.isAliased = true;
+      payload.customAlias = options.alias;
     }
 
     if (options?.expiresAt) {
       payload.expiresAt = options.expiresAt;
     }
 
+    console.log("i am payload", payload)
     // Hits /api/url/shorten as before
     return this.http.post<ShortenResponse>(`${this.BASE_URL}/shorten`, payload, {
       withCredentials: true 

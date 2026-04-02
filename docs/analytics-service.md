@@ -6,7 +6,7 @@ The Analytics Service is a high-throughput, event-driven microservice responsibl
 
 ## 🛠️ Core Responsibilities
 
-- **Event Ingestion:** Listens to the `url:clicked` and `url:deleted` subjects on the **NATS Streaming** bus.
+- **Event Ingestion:** Listens to the `url:clicked`, `url:expired` and `url:deleted` subjects on the **NATS Streaming** bus.
 - **Metadata Synchronization:** Maintains a mirrored state of URL metadata (Short URL, Long URL, UserID) within ClickHouse to allow for "stitched" API responses.
 - **Data Transformation:** Normalizes high-resolution browser timestamps into ClickHouse-compatible formats (removing 'T' and 'Z' markers).
 - **Real-Time Aggregation:** Orchestrates the flow of raw click events into pre-aggregated summary tables via Materialized Views.

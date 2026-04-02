@@ -11,8 +11,9 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { DeleteConfirmDialogComponent } from '../delete-confirm-dialog/delete-confirm-dialog';
-import { MatDialog } from '@angular/material/dialog';
+import { AnalyticsMetricDialog } from '../analytics-metric-dialog/analytics-metric-dialog';
 
 export interface LinkWithStats {
   id: string;
@@ -29,7 +30,8 @@ export interface LinkWithStats {
   standalone: true,
   imports: [
     CommonModule, MatTableModule, MatCardModule, 
-    MatButtonModule, MatIconModule, MatSnackBarModule, MatTooltipModule
+    MatButtonModule, MatIconModule, MatSnackBarModule, 
+    MatTooltipModule, MatDialogModule
   ],
   templateUrl: './all-links-tab.html',
   styleUrl: './all-links-tab.scss'
@@ -37,6 +39,7 @@ export interface LinkWithStats {
 export class AllLinksTab implements OnInit {
   private http = inject(HttpClient);
   private snackBar = inject(MatSnackBar);
+  private dialog = inject(MatDialog);
 
   dataSource = signal<LinkWithStats[]>([]);
   isLoading = signal(true);
@@ -49,19 +52,32 @@ export class AllLinksTab implements OnInit {
   loadData() {
     this.isLoading.set(true);
     
-    // Stitching logic: Parallel calls to URL and Analytics services
     forkJoin({
       links: this.http.get<any[]>('/api/url/all'),
       stats: this.http.get<any[]>('/api/analytics/counts').pipe(
-        catchError(() => of([])) // Graceful degradation if Analytics is down
+        catchError(() => of([]))
       )
     }).pipe(
       map(({ links, stats }) => {
-        return links.map(link => ({
-          ...link,
-          // Match count by shortUrlId, default to 0 if not found, or '-' on error
-          totalClicks: stats.find(s => s.shortUrlId === link.id)?.count ?? 0
-        }));
+        // Debugging: Open your browser console to see these!
+        console.log('Links from API:', links);
+        console.log('Stats from API:', stats);
+
+        return links.map(link => {
+          /**
+           * 1. Use '==' instead of '===' to handle string vs number mismatches.
+           * 2. Check link.id (URL service) against s.shortUrlId or s.id (Analytics service).
+           * 3. Use 'count' or 'total' depending on what your Analytics service returns.
+           */
+          const foundStat = stats.find(s => 
+            (s.shortUrlId == link.id) || (s.id == link.id) || (s.shortUrl == link.shortUrl)
+          );
+
+          return {
+            ...link,
+            totalClicks: foundStat ? (foundStat.count ?? foundStat.total ?? 0) : 0
+          };
+        });
       })
     ).subscribe({
       next: (combinedData) => {
@@ -85,27 +101,32 @@ export class AllLinksTab implements OnInit {
     this.snackBar.open('Link copied!', 'OK', { duration: 2000 });
   }
 
-  // 1. Add MatDialog to your imports list in the @Component decorator
-// 2. Inject it: 
-private dialog = inject(MatDialog);
+  openAnalytics(link: LinkWithStats) {
+    this.dialog.open(AnalyticsMetricDialog, {
+      width: '700px',
+      maxWidth: '90vw',
+      data: link, // Passing the whole link object (including totalClicks)
+      panelClass: 'custom-dialog-container'
+    });
+  }
 
-onDelete(linkId: string) {
-  const dialogRef = this.dialog.open(DeleteConfirmDialogComponent, {
-    width: '400px',
-    height: '200px', // Adjusted to fit your 100-200px requirement
-    backdropClass: 'blur-backdrop',
-    disableClose: true // User must click a button to close
-  });
+  onDelete(linkId: string) {
+    const dialogRef = this.dialog.open(DeleteConfirmDialogComponent, {
+      width: '400px',
+      height: '200px',
+      backdropClass: 'blur-backdrop',
+      disableClose: true
+    });
 
-  dialogRef.afterClosed().subscribe(confirmed => {
-    if (confirmed) {
-      this.http.delete(`/api/url/${linkId}`).subscribe({
-        next: () => {
-          this.dataSource.update(links => links.filter(l => l.id !== linkId));
-          this.snackBar.open('Link deleted', 'OK', { duration: 2000 });
-        }
-      });
-    }
-  });
-}
+    dialogRef.afterClosed().subscribe(confirmed => {
+      if (confirmed) {
+        this.http.delete(`/api/url/${linkId}`).subscribe({
+          next: () => {
+            this.dataSource.update(links => links.filter(l => l.id !== linkId));
+            this.snackBar.open('Link deleted', 'OK', { duration: 2000 });
+          }
+        });
+      }
+    });
+  }
 }

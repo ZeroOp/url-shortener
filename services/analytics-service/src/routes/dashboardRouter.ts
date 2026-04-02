@@ -50,4 +50,42 @@ router.get('/api/analytics/counts', requireAuth, async (req, res) => {
     }
 });
 
+
+/**
+ * 5. Time-Series Metrics for a specific link
+ * GET /api/analytics/timeseries/:shortUrl?resolution=1m&limit=2
+ */
+router.get('/api/analytics/timeseries/:shortUrl', requireAuth, async (req, res) => {
+    const shortUrl = req.params.shortUrl as string;
+    const resolution = req.query.resolution as string || '1h'; // 1m, 10m, 1h
+    const limit = Number(req.query.limit) || 24; // Hours or Days depending on res
+    const userId = req.currentUser!.id;
+
+    try {
+        
+        let data;
+
+        switch (resolution) {
+            case '1m':
+                // High res: Last 'limit' hours in 1-minute buckets
+                data = await clickhouseWrapper.clicks.getMinuteTimeSeries(shortUrl, limit);
+                break;
+            case '10m':
+                // Med res: Last 'limit' hours in 10-minute buckets
+                data = await clickhouseWrapper.clicks.getTenMinuteTimeSeries(shortUrl, limit);
+                break;
+            case '1h':
+            default:
+                // Standard res: Last 'limit' days in 1-hour buckets
+                data = await clickhouseWrapper.clicks.getHourlyTimeSeries(shortUrl, limit);
+                break;
+        }
+
+        res.send(data);
+    } catch (err) {
+        console.error(`[Analytics] TimeSeries Error (${shortUrl}):`, err);
+        res.status(500).send({ error: 'Failed to fetch time-series data' });
+    }
+});
+
 export { router as dashboardRouter };

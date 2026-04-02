@@ -93,11 +93,18 @@ export class CreateLinkTab implements OnInit {
   onSubmit() {
     if (this.linkForm.invalid) return;
     this.isLoading.set(true);
-
+  
     const { longUrl, hasAlias, alias, expiresAt, expiresTime } = this.linkForm.value;
-    const options: any = {};
-    if (hasAlias && alias) options.alias = alias;
-
+    console.log("I am has aliased", hasAlias, alias)
+    // Construct the payload correctly
+    const options: any = {
+      isAliased: !!hasAlias // Explicitly send the boolean flag
+    };
+  
+    if (hasAlias && alias) {
+      options.alias = alias;
+    }
+  
     if (expiresAt) {
       const expiration = new Date(expiresAt);
       if (expiresTime) {
@@ -109,15 +116,26 @@ export class CreateLinkTab implements OnInit {
       options.expiresAt = expiration.toISOString();
     }
 
+    console.log("I am options",)
+    
     this.urlService.shortenUrl(longUrl, options).subscribe({
       next: (res) => {
         this.lastCreatedUrl.set(this.formatShortUrl(res.shortUrl, res.isAliased));
         this.updateRecentLinksTable(res);
-        this.linkForm.reset({ longUrl: '', hasAlias: false, alias: '', expiresAt: null, expiresTime: '' });
+        // Reset form but preserve default states
+        this.linkForm.reset({ 
+          longUrl: '', 
+          hasAlias: false, 
+          alias: '', 
+          expiresAt: null, 
+          expiresTime: '' 
+        });
         this.isLoading.set(false);
       },
       error: (err) => {
-        console.error('Creation failed:', err);
+        // Logic for SDE-2: Show the actual API error to the user via SnackBar
+        const errorMsg = err.error?.errors?.[0]?.message || 'Creation failed';
+        this.snackBar.open(errorMsg, 'Close', { duration: 5000 });
         this.isLoading.set(false);
       }
     });
